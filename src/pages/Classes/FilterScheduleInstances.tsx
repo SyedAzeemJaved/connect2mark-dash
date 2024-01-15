@@ -1,5 +1,5 @@
-import { useState, useEffect, useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { AuthContext } from '@context';
 import {
@@ -14,12 +14,31 @@ import { Breadcrumb, Pagination } from '@components';
 
 import { constants } from '@constants';
 
-import { TimestampConverter } from '../../utils/time';
+import { getCurrentDayString, TimestampConverter } from '../../utils/time';
 
-export default function AllSchedules() {
+type FilterSelectedProps = {
+    filter: 'date' | 'day' | 'today';
+    date: string | null;
+    day:
+        | 'monday'
+        | 'tuesday'
+        | 'wednesday'
+        | 'thursday'
+        | 'friday'
+        | 'saturday'
+        | 'sunday'
+        | null;
+};
+
+export default function FilterSchedules() {
     const { user } = useContext(AuthContext) as UserContextProps;
 
     const [AllSchedules, setAllSchedules] = useState<ScheduleProps[] | []>([]);
+    const [selectedFilter, setSelectedFilter] = useState<FilterSelectedProps>({
+        filter: 'today',
+        date: null,
+        day: getCurrentDayString(new Date().getDay()),
+    });
     const [pageNumber, setPageNumber] = useState(1);
     const [apiResponse, setApiResponse] = useState<ApiResponse>({
         total: 0,
@@ -30,6 +49,62 @@ export default function AllSchedules() {
     });
 
     const navigate = useNavigate();
+
+    const isDateValidRegex = (inputDate: string) => {
+        const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+        // If the format doesn't match 'YYYY-MM-DD'
+        if (dateRegex.test(inputDate)) {
+            return true;
+        }
+        // fireToast(
+        //   'Invalid date format',
+        //   'Please enter date in YYYY-MM-DD format',
+        //   FireToastEnum.WARNING,
+        // );
+        return false;
+    };
+
+    const isDateValid = (inputDate: string) => {
+        // If it's an invalid date (e.g., February 31)
+        const dateParts = inputDate.split('-');
+        const year = parseInt(dateParts[0]);
+        const month = parseInt(dateParts[1]) - 1; // Month is 0-indexed in JavaScript (0 - 11)
+        const day = parseInt(dateParts[2]);
+
+        const dateObject = new Date(year, month, day);
+
+        if (
+            dateObject.getFullYear() !== year ||
+            dateObject.getMonth() !== month ||
+            dateObject.getDate() !== day
+        ) {
+            fireToast(
+                'Invalid date',
+                'Please enter a valid date in YYYY-MM-DD format',
+                FireToastEnum.WARNING,
+            );
+            return false;
+        }
+        return true;
+    };
+
+    const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        // All checks were true
+        setSelectedFilter({
+            ...selectedFilter,
+            [e.target.name]: e.target.value,
+        });
+    };
+
+    const handleSelectedFilterChange: React.MouseEventHandler<
+        HTMLButtonElement
+    > = (e) => {
+        setAllSchedules([]);
+        setSelectedFilter({
+            ...selectedFilter,
+            filter: e.currentTarget.name,
+        });
+    };
 
     const handleEditClick = (id: number) => {
         navigate(`/schedules/${id}`);
@@ -75,8 +150,42 @@ export default function AllSchedules() {
 
     const fetchSchedules = async () => {
         try {
+            setApiResponse({
+                total: 0,
+                page: 0,
+                size: constants.RESULTS_PER_PAGE,
+                pages: 0,
+                items: [],
+            });
+
+            if (selectedFilter.filter === 'day') {
+                if (selectedFilter.day === null) {
+                    return;
+                }
+            } else if (selectedFilter.filter === 'date') {
+                if (
+                    selectedFilter.date === '' ||
+                    selectedFilter.date === null
+                ) {
+                    return;
+                }
+                if (!isDateValidRegex(selectedFilter.date)) {
+                    return;
+                }
+                if (!isDateValid(selectedFilter.date)) {
+                    return;
+                }
+            }
+
+            const url =
+                selectedFilter.filter === 'today'
+                    ? `${constants.SCHEDULES}/today`
+                    : selectedFilter.filter === 'date'
+                      ? `${constants.SCHEDULES}/date/${selectedFilter.date}`
+                      : `${constants.SCHEDULES}/day/${selectedFilter.day}`;
+
             const res = await fetch(
-                `${constants.SCHEDULES}?page=${pageNumber}&size=${constants.RESULTS_PER_PAGE}`,
+                `${url}?page=${pageNumber}&size=${constants.RESULTS_PER_PAGE}`,
                 {
                     method: 'GET',
                     headers: {
@@ -159,16 +268,22 @@ export default function AllSchedules() {
         fetchSchedules();
 
         return () => {};
-    }, [pageNumber]);
+    }, [pageNumber, selectedFilter]);
 
     return (
         <>
-            <Breadcrumb pageName="Schedules" />
+            <Breadcrumb pageName="Filter Schedules" />
+
             <div className="flex flex-col gap-6">
-                <div className="flex flex-row justify-end align-bottom">
-                    <Link
-                        to="/schedules/add"
-                        className="inline-flex items-center justify-center gap-2.5 bg-primary px-10 py-4 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
+                <div className="flex flex-row justify-end gap-4 text-center align-bottom font-medium text-white">
+                    <button
+                        className={`inline-flex items-center justify-center gap-2.5 px-10 py-4 hover:bg-opacity-90 lg:px-8 xl:px-10 ${
+                            selectedFilter.filter === 'date'
+                                ? 'bg-primary'
+                                : 'bg-graydark '
+                        }`}
+                        name="date"
+                        onClick={handleSelectedFilterChange}
                     >
                         <span>
                             <svg
@@ -176,11 +291,191 @@ export default function AllSchedules() {
                                 viewBox="0 0 20 20"
                                 className="h-5 w-5 fill-current"
                             >
-                                <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+                                <path
+                                    fillRule="evenodd"
+                                    d="M5.75 2a.75.75 0 0 1 .75.75V4h7V2.75a.75.75 0 0 1 1.5 0V4h.25A2.75 2.75 0 0 1 18 6.75v8.5A2.75 2.75 0 0 1 15.25 18H4.75A2.75 2.75 0 0 1 2 15.25v-8.5A2.75 2.75 0 0 1 4.75 4H5V2.75A.75.75 0 0 1 5.75 2Zm-1 5.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25H4.75Z"
+                                    clipRule="evenodd"
+                                />
                             </svg>
                         </span>
-                        Add new
-                    </Link>
+                        Date
+                    </button>
+                    <button
+                        className={`inline-flex items-center justify-center gap-2.5 px-10 py-4 hover:bg-opacity-90 lg:px-8 xl:px-10 ${
+                            selectedFilter.filter === 'day'
+                                ? 'bg-primary'
+                                : 'bg-graydark '
+                        }`}
+                        name="day"
+                        onClick={handleSelectedFilterChange}
+                    >
+                        <span>
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 20 20"
+                                className="h-5 w-5 fill-current"
+                            >
+                                <path d="M5.25 12a.75.75 0 0 1 .75-.75h.01a.75.75 0 0 1 .75.75v.01a.75.75 0 0 1-.75.75H6a.75.75 0 0 1-.75-.75V12ZM6 13.25a.75.75 0 0 0-.75.75v.01c0 .414.336.75.75.75h.01a.75.75 0 0 0 .75-.75V14a.75.75 0 0 0-.75-.75H6ZM7.25 12a.75.75 0 0 1 .75-.75h.01a.75.75 0 0 1 .75.75v.01a.75.75 0 0 1-.75.75H8a.75.75 0 0 1-.75-.75V12ZM8 13.25a.75.75 0 0 0-.75.75v.01c0 .414.336.75.75.75h.01a.75.75 0 0 0 .75-.75V14a.75.75 0 0 0-.75-.75H8ZM9.25 10a.75.75 0 0 1 .75-.75h.01a.75.75 0 0 1 .75.75v.01a.75.75 0 0 1-.75.75H10a.75.75 0 0 1-.75-.75V10ZM10 11.25a.75.75 0 0 0-.75.75v.01c0 .414.336.75.75.75h.01a.75.75 0 0 0 .75-.75V12a.75.75 0 0 0-.75-.75H10ZM9.25 14a.75.75 0 0 1 .75-.75h.01a.75.75 0 0 1 .75.75v.01a.75.75 0 0 1-.75.75H10a.75.75 0 0 1-.75-.75V14ZM12 9.25a.75.75 0 0 0-.75.75v.01c0 .414.336.75.75.75h.01a.75.75 0 0 0 .75-.75V10a.75.75 0 0 0-.75-.75H12ZM11.25 12a.75.75 0 0 1 .75-.75h.01a.75.75 0 0 1 .75.75v.01a.75.75 0 0 1-.75.75H12a.75.75 0 0 1-.75-.75V12ZM12 13.25a.75.75 0 0 0-.75.75v.01c0 .414.336.75.75.75h.01a.75.75 0 0 0 .75-.75V14a.75.75 0 0 0-.75-.75H12ZM13.25 10a.75.75 0 0 1 .75-.75h.01a.75.75 0 0 1 .75.75v.01a.75.75 0 0 1-.75.75H14a.75.75 0 0 1-.75-.75V10ZM14 11.25a.75.75 0 0 0-.75.75v.01c0 .414.336.75.75.75h.01a.75.75 0 0 0 .75-.75V12a.75.75 0 0 0-.75-.75H14Z" />
+                                <path
+                                    fillRule="evenodd"
+                                    d="M5.75 2a.75.75 0 0 1 .75.75V4h7V2.75a.75.75 0 0 1 1.5 0V4h.25A2.75 2.75 0 0 1 18 6.75v8.5A2.75 2.75 0 0 1 15.25 18H4.75A2.75 2.75 0 0 1 2 15.25v-8.5A2.75 2.75 0 0 1 4.75 4H5V2.75A.75.75 0 0 1 5.75 2Zm-1 5.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25H4.75Z"
+                                    clipRule="evenodd"
+                                />
+                            </svg>
+                        </span>
+                        Day
+                    </button>
+                    <button
+                        className={`inline-flex items-center justify-center gap-2.5 px-10 py-4 hover:bg-opacity-90 lg:px-8 xl:px-10 ${
+                            selectedFilter.filter === 'today'
+                                ? 'bg-primary'
+                                : 'bg-graydark '
+                        }`}
+                        name="today"
+                        onClick={handleSelectedFilterChange}
+                    >
+                        <span>
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 20 20"
+                                className="h-5 w-5 fill-current"
+                            >
+                                <path
+                                    fillRule="evenodd"
+                                    d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm.75-13a.75.75 0 0 0-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 0 0 0-1.5h-3.25V5Z"
+                                    clipRule="evenodd"
+                                />
+                            </svg>
+                        </span>
+                        Today
+                    </button>
+                </div>
+
+                <div className="flex flex-row justify-end gap-4 text-center align-bottom font-medium text-white">
+                    {selectedFilter.filter === 'day' && (
+                        <div
+                            className="text-gray-900 rounded-md text-sm shadow-sm"
+                            role="group"
+                        >
+                            <button
+                                type="button"
+                                className={`custom-btn-group w-50 rounded-s-lg border border-b border-r-0 border-t px-5 py-3 font-medium ${
+                                    selectedFilter.day === 'monday' &&
+                                    'custom-btn-group-selected'
+                                }`}
+                                onClick={(e) =>
+                                    setSelectedFilter((prev) => ({
+                                        ...prev,
+                                        day: 'monday',
+                                    }))
+                                }
+                            >
+                                Monday
+                            </button>
+                            <button
+                                type="button"
+                                className={`custom-btn-group w-50 border border-b border-r-0 border-t px-5 py-3 font-medium ${
+                                    selectedFilter.day === 'tuesday' &&
+                                    'custom-btn-group-selected'
+                                }`}
+                                onClick={(e) =>
+                                    setSelectedFilter((prev) => ({
+                                        ...prev,
+                                        day: 'tuesday',
+                                    }))
+                                }
+                            >
+                                Tuesday
+                            </button>
+                            <button
+                                type="button"
+                                className={`custom-btn-group w-50 border border-b border-r-0 border-t px-5 py-3 font-medium ${
+                                    selectedFilter.day === 'wednesday' &&
+                                    'custom-btn-group-selected'
+                                }`}
+                                onClick={(e) =>
+                                    setSelectedFilter((prev) => ({
+                                        ...prev,
+                                        day: 'wednesday',
+                                    }))
+                                }
+                            >
+                                Wednesday
+                            </button>
+                            <button
+                                type="button"
+                                className={`custom-btn-group w-50 border border-b border-r-0 border-t px-5 py-3 font-medium ${
+                                    selectedFilter.day === 'thursday' &&
+                                    'custom-btn-group-selected'
+                                }`}
+                                onClick={(e) =>
+                                    setSelectedFilter((prev) => ({
+                                        ...prev,
+                                        day: 'thursday',
+                                    }))
+                                }
+                            >
+                                Thursday
+                            </button>
+                            <button
+                                type="button"
+                                className={`custom-btn-group w-50 border border-b border-r-0 border-t px-5 py-3 font-medium ${
+                                    selectedFilter.day === 'friday' &&
+                                    'custom-btn-group-selected'
+                                }`}
+                                onClick={(e) =>
+                                    setSelectedFilter((prev) => ({
+                                        ...prev,
+                                        day: 'friday',
+                                    }))
+                                }
+                            >
+                                Friday
+                            </button>
+                            <button
+                                type="button"
+                                className={`custom-btn-group w-50 border border-b border-r-0 border-t px-5 py-3 font-medium ${
+                                    selectedFilter.day === 'saturday' &&
+                                    'custom-btn-group-selected'
+                                }`}
+                                onClick={(e) =>
+                                    setSelectedFilter((prev) => ({
+                                        ...prev,
+                                        day: 'saturday',
+                                    }))
+                                }
+                            >
+                                Saturaday
+                            </button>
+                            <button
+                                type="button"
+                                className={`custom-btn-group w-50 rounded-e-lg border border-b border-r-0 border-t px-5 py-3 font-medium ${
+                                    selectedFilter.day === 'sunday' &&
+                                    'custom-btn-group-selected'
+                                }`}
+                                onClick={(e) =>
+                                    setSelectedFilter((prev) => ({
+                                        ...prev,
+                                        day: 'sunday',
+                                    }))
+                                }
+                            >
+                                Sunday
+                            </button>
+                        </div>
+                    )}
+                    {selectedFilter.filter === 'date' && (
+                        <input
+                            type="text"
+                            placeholder="Enter schedule date [YYYY-MM-DD]"
+                            className="w-1/3 rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                            name="date"
+                            id="date"
+                            pattern="\d{4}-\d{2}-\d{2}"
+                            value={selectedFilter.date ?? ''}
+                            onChange={handleDateChange}
+                        />
+                    )}
                 </div>
 
                 <Pagination

@@ -1,5 +1,5 @@
 export const enum FireToastEnum {
-  SUCCESS,
-  WARNING,
-  DANGER,
+    SUCCESS,
+    WARNING,
+    DANGER,
 }

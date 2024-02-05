@@ -103,9 +103,7 @@ export default function FilterScheduleInstances() {
     };
 
     const handleDeleteClick = async (id: number) => {
-        let r = confirm(
-            'Are you sure you want to delete this schedule instance?',
-        );
+        let r = confirm('Are you sure you want to delete this class?');
         if (r === true) {
             try {
                 const res = await fetch(
@@ -130,7 +128,7 @@ export default function FilterScheduleInstances() {
 
                 fireToast(
                     'Success',
-                    'Schedule instance deleted successfully',
+                    'Class deleted successfully',
                     FireToastEnum.SUCCESS,
                 );
             } catch (err: any) {
@@ -290,7 +288,7 @@ export default function FilterScheduleInstances() {
 
     return (
         <>
-            <Breadcrumb pageName="Filter Schedule Instances" />
+            <Breadcrumb pageName="Filter Classes" />
 
             <div className="flex flex-col gap-6">
                 <div className="flex flex-row justify-end gap-4 text-center align-bottom font-medium text-white">
@@ -348,7 +346,7 @@ export default function FilterScheduleInstances() {
                     {selectedFilter.filter === 'date' && (
                         <input
                             type="text"
-                            placeholder="Enter schedule instance date [YYYY-MM-DD]"
+                            placeholder="Enter class date [YYYY-MM-DD]"
                             className="w-1/3 rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                             name="date"
                             id="date"

@@ -181,8 +181,8 @@ export default function FilterSchedules() {
                 selectedFilter.filter === 'today'
                     ? `${constants.SCHEDULES}/today`
                     : selectedFilter.filter === 'date'
-                    ? `${constants.SCHEDULES}/date/${selectedFilter.date}`
-                    : `${constants.SCHEDULES}/day/${selectedFilter.day}`;
+                      ? `${constants.SCHEDULES}/date/${selectedFilter.date}`
+                      : `${constants.SCHEDULES}/day/${selectedFilter.day}`;
 
             const res = await fetch(
                 `${url}?page=${pageNumber}&size=${constants.RESULTS_PER_PAGE}`,

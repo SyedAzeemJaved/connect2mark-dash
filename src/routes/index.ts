@@ -30,6 +30,12 @@ const FilterSchedules = lazy(
 const AllScheduleInstances = lazy(
     () => import('../pages/Classes/AllScheduleInstances'),
 );
+const EditScheduleInstance = lazy(
+    () => import('../pages/Classes/EditScheduleInstance'),
+);
+const FilterScheduleInstance = lazy(
+    () => import('../pages/Classes/FilterScheduleInstances'),
+);
 
 // Profile
 const Profile = lazy(() => import('../pages/Profile'));
@@ -101,16 +107,16 @@ const coreRoutes = [
         title: 'All Classes',
         component: AllScheduleInstances,
     },
-    // {
-    //   path: '/classes/add',
-    //   title: 'Add Class',
-    //   component: ,
-    // },
-    // {
-    //   path: '/classes/filter',
-    //   title: 'Filter Classes',
-    //   component: ,
-    // },
+    {
+        path: '/classes/:id',
+        title: 'Edit Class',
+        component: EditScheduleInstance,
+    },
+    {
+        path: '/classes/filter',
+        title: 'Filter Classes',
+        component: FilterScheduleInstance,
+    },
     {
         path: '/profile',
         title: 'Profile',

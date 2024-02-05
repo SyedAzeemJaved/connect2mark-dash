@@ -82,7 +82,7 @@ export interface ScheduleInstanceProps {
     readonly staff_member: StaffProps;
     readonly location: LocationProps;
 
-    date: string | null;
+    readonly date: string | null;
     readonly day:
         | 'monday'
         | 'tuesday'

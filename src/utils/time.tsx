@@ -32,7 +32,17 @@ export function convertToUTCDate(inputDate: string): string {
     return utcDate.toISOString().split('T')[0]; // Extracts YYYY-MM-DD from the ISO string
 }
 
-export function getCurrentDayString(day: number): string | null {
+export function getCurrentDayString(
+    day: number,
+):
+    | 'sunday'
+    | 'monday'
+    | 'tuesday'
+    | 'wednesday'
+    | 'thursday'
+    | 'friday'
+    | 'saturday'
+    | null {
     // Expects a JS Date day, expects a value between 0 and 6
     // 0 for Sunday, 1 for Monday, 2 for Tuesday, and so on
     if (day === 0) {
@@ -44,7 +54,7 @@ export function getCurrentDayString(day: number): string | null {
     } else if (day === 3) {
         return 'wednesday';
     } else if (day === 4) {
-        return 'thrsday';
+        return 'thursday';
     } else if (day === 5) {
         return 'friday';
     } else if (day === 6) {

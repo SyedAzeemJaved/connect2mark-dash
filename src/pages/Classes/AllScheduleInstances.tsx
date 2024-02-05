@@ -41,13 +41,16 @@ export default function AllScheduleInstances() {
         let r = confirm('Are you sure you want to delete this class?');
         if (r === true) {
             try {
-                const res = await fetch(`${constants.SCHEDULES}/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        accept: 'application/json',
-                        Authorization: `Bearer ${user.accessToken}`,
+                const res = await fetch(
+                    `${constants.SCHEDULE_INSTANCES}/${id}`,
+                    {
+                        method: 'DELETE',
+                        headers: {
+                            accept: 'application/json',
+                            Authorization: `Bearer ${user.accessToken}`,
+                        },
                     },
-                });
+                );
 
                 const response = await res.json();
 
@@ -175,21 +178,6 @@ export default function AllScheduleInstances() {
         <>
             <Breadcrumb pageName="Classes" />
             <div className="flex flex-col gap-6">
-                {/* <div className="flex flex-row justify-end align-bottom">
-          <button className="inline-flex items-center justify-center gap-2.5 bg-primary py-4 px-10 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10">
-            <span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                className="fill-current w-5 h-5"
-              >
-                <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
-              </svg>
-            </span>
-            Filter
-          </button>
-        </div> */}
-
                 <Pagination
                     pageNumber={pageNumber}
                     setPageNumber={setPageNumber}
@@ -216,12 +204,6 @@ export default function AllScheduleInstances() {
                                             className="min-w-[440px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11"
                                             colSpan={2}
                                         >
-                                            Day
-                                        </th>
-                                        <th
-                                            className="min-w-[440px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11"
-                                            colSpan={2}
-                                        >
                                             Date
                                         </th>
                                         <th className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
@@ -230,37 +212,33 @@ export default function AllScheduleInstances() {
                                         <th className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
                                             Last update
                                         </th>
-                                        {/* <th className="px-4 py-4 font-medium text-black dark:text-white">
+                                        <th className="px-4 py-4 font-medium text-black dark:text-white">
                                             Actions
-                                        </th> */}
+                                        </th>
                                     </tr>
                                     <tr>
                                         {/* Staff Member */}
-                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
+                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white">
                                             Original
                                         </th>
-                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
+                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white">
                                             Current
                                         </th>
                                         {/* Location */}
-                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
+                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white">
                                             Original
                                         </th>
-                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
+                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white">
                                             Current
                                         </th>
-                                        {/* Day */}
-                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
-                                            Original
-                                        </th>
-                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
+                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white">
                                             Current
                                         </th>
                                         {/* Date */}
-                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
+                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white">
                                             Original
                                         </th>
-                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
+                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white">
                                             Current
                                         </th>
                                     </tr>
@@ -333,31 +311,13 @@ export default function AllScheduleInstances() {
                                                             {
                                                                 schedule_instance
                                                                     .schedule
-                                                                    .day
+                                                                    .date
                                                             }
                                                         </p>
                                                     </td>
                                                     {/* Current Date */}
                                                     <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                                                         <p className="capitalize text-black dark:text-white">
-                                                            {
-                                                                schedule_instance.day
-                                                            }
-                                                        </p>
-                                                    </td>
-                                                    {/* Current Day */}
-                                                    <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-                                                        <p className="text-black dark:text-white">
-                                                            {
-                                                                schedule_instance
-                                                                    .schedule
-                                                                    .date
-                                                            }
-                                                        </p>
-                                                    </td>
-                                                    {/* Original Day */}
-                                                    <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-                                                        <p className="text-black dark:text-white">
                                                             {
                                                                 schedule_instance.date
                                                             }
@@ -377,7 +337,7 @@ export default function AllScheduleInstances() {
                                                             )}
                                                         </p>
                                                     </td>
-                                                    {/* <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+                                                    <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                                                         <div className="flex items-center space-x-3.5">
                                                             <button
                                                                 className="hover:text-primary"
@@ -440,7 +400,7 @@ export default function AllScheduleInstances() {
                                                                 </svg>
                                                             </button>
                                                         </div>
-                                                    </td> */}
+                                                    </td>
                                                 </tr>
                                             );
                                         },

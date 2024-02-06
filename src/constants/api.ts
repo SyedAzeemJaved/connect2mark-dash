@@ -10,5 +10,5 @@ export const constants = {
     SCHEDULES: `${API_BASE_URL}/schedules`,
     SCHEDULE_INSTANCES: `${API_BASE_URL}/schedule-instances`,
 
-    RESULTS_PER_PAGE: 10,
+    RESULTS_PER_PAGE: 7,
 };

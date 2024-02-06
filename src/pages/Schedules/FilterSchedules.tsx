@@ -14,7 +14,11 @@ import { Breadcrumb, Pagination } from '@components';
 
 import { constants } from '@constants';
 
-import { getCurrentDayString, TimestampConverter } from '../../utils/time';
+import {
+    getCurrentDayString,
+    convertUTCTimeToLocalTime,
+    TimestampConverter,
+} from '../../utils/time';
 
 type FilterSelectedProps = {
     filter: 'date' | 'day' | 'today';
@@ -501,6 +505,12 @@ export default function FilterSchedules() {
                                             Location
                                         </th>
                                         <th className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
+                                            Start
+                                        </th>
+                                        <th className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
+                                            End
+                                        </th>
+                                        <th className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
                                             Day
                                         </th>
                                         <th className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
@@ -555,6 +565,20 @@ export default function FilterSchedules() {
                                                             schedule.location
                                                                 .title
                                                         }
+                                                    </p>
+                                                </td>
+                                                <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+                                                    <p className="text-black dark:text-white">
+                                                        {convertUTCTimeToLocalTime(
+                                                            schedule.start_time_in_utc,
+                                                        )}
+                                                    </p>
+                                                </td>
+                                                <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+                                                    <p className="text-black dark:text-white">
+                                                        {convertUTCTimeToLocalTime(
+                                                            schedule.end_time_in_utc,
+                                                        )}
                                                     </p>
                                                 </td>
                                                 <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">

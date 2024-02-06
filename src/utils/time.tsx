@@ -32,6 +32,32 @@ export function convertToUTCDate(inputDate: string): string {
     return utcDate.toISOString().split('T')[0]; // Extracts YYYY-MM-DD from the ISO string
 }
 
+export const convertUTCTimeToLocalTime = (time: string): string => {
+    const _ = new Date();
+
+    const hours = parseInt(time.slice(0, 2));
+    const minutes = parseInt(time.slice(3, 5));
+    const seconds = parseInt(time.slice(6, 8));
+
+    // NOTE:
+    // This does not return local time
+
+    // As the time is already in UTC, we need to offset it with local time when creating a new Date object
+    // Other wise the already UTC time is again converted to UTC, that means the offset it applied twice
+
+    // new Date(year, monthIndex, day, hours, minutes, seconds)
+    return new Date(
+        _.getUTCFullYear(),
+        _.getUTCMonth(),
+        _.getUTCDate(),
+        hours - _.getTimezoneOffset() / 60,
+        minutes,
+        seconds,
+    )
+        .toTimeString()
+        .slice(0, 8);
+};
+
 export function getCurrentDayString(
     day: number,
 ):

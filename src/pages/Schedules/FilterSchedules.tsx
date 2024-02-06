@@ -355,7 +355,7 @@ export default function FilterSchedules() {
                     </button>
                 </div>
 
-                <div className="flex flex-row justify-end gap-4 text-center align-bottom font-medium text-white">
+                <div className="flex flex-row justify-end gap-4 text-center align-bottom font-medium">
                     {selectedFilter.filter === 'day' && (
                         <div
                             className="text-gray-900 rounded-md text-sm shadow-sm"

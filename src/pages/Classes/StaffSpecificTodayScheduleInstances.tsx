@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { AuthContext } from '@context';
 import {
@@ -19,12 +19,13 @@ import {
     TimestampConverter,
 } from '../../utils/time';
 
-export default function AllScheduleInstances() {
+export default function StaffSpecificTodayScheduleInstances() {
+    const { id } = useParams();
+
     const { user } = useContext(AuthContext) as UserContextProps;
 
-    const [AllScheduleInstances, setAllScheduleInstances] = useState<
-        ScheduleInstanceProps[]
-    >([]);
+    const [staffTodayAllScheduleInstances, setStaffTodayAllScheduleInstances] =
+        useState<ScheduleInstanceProps[]>([]);
     const [pageNumber, setPageNumber] = useState(1);
     const [apiResponse, setApiResponse] = useState<ApiResponse>({
         total: 0,
@@ -76,15 +77,15 @@ export default function AllScheduleInstances() {
                     FireToastEnum.DANGER,
                 );
             } finally {
-                fetchScheduleInstances();
+                fetchStaffTodayScheduleInstances();
             }
         }
     };
 
-    const fetchScheduleInstances = async () => {
+    const fetchStaffTodayScheduleInstances = async () => {
         try {
             const res = await fetch(
-                `${constants.SCHEDULE_INSTANCES}?page=${pageNumber}&size=${constants.RESULTS_PER_PAGE}`,
+                `${constants.SCHEDULE_INSTANCES}/today/${id}?page=${pageNumber}&size=${constants.RESULTS_PER_PAGE}`,
                 {
                     method: 'GET',
                     headers: {
@@ -161,7 +162,7 @@ export default function AllScheduleInstances() {
                 items: response?.items,
             });
 
-            setAllScheduleInstances(scheduleInstanceArr);
+            setStaffTodayAllScheduleInstances(scheduleInstanceArr);
         } catch (err: any) {
             fireToast(
                 'There seems to be a problem',
@@ -172,14 +173,14 @@ export default function AllScheduleInstances() {
     };
 
     useEffect(() => {
-        fetchScheduleInstances();
+        fetchStaffTodayScheduleInstances();
 
         return () => {};
     }, [pageNumber]);
 
     return (
         <>
-            <Breadcrumb pageName="Classes" />
+            <Breadcrumb pageName="Staff Today Classes" />
             <div className="flex flex-col gap-6">
                 <Pagination
                     pageNumber={pageNumber}
@@ -270,7 +271,7 @@ export default function AllScheduleInstances() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {AllScheduleInstances.map(
+                                    {staffTodayAllScheduleInstances.map(
                                         (schedule_instance) => {
                                             return (
                                                 <tr key={schedule_instance.id}>

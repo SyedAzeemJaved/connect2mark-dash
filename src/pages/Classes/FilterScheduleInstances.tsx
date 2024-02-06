@@ -28,7 +28,7 @@ export default function FilterScheduleInstances() {
     const { user } = useContext(AuthContext) as UserContextProps;
 
     const [AllScheduleInstances, setAllScheduleInstances] = useState<
-        ScheduleInstanceProps[] | []
+        ScheduleInstanceProps[]
     >([]);
     const [selectedFilter, setSelectedFilter] = useState<FilterSelectedProps>({
         filter: 'today',

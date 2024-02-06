@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 
 import { AuthContext } from '@context';
 import {
@@ -19,10 +19,14 @@ import {
     TimestampConverter,
 } from '../../utils/time';
 
-export default function AllSchedules() {
+export default function StaffSpecificSchedules() {
+    const { id } = useParams();
+
     const { user } = useContext(AuthContext) as UserContextProps;
 
-    const [AllSchedules, setAllSchedules] = useState<ScheduleProps[]>([]);
+    const [staffAllSchedules, setStaffAllSchedules] = useState<ScheduleProps[]>(
+        [],
+    );
     const [pageNumber, setPageNumber] = useState(1);
     const [apiResponse, setApiResponse] = useState<ApiResponse>({
         total: 0,
@@ -71,15 +75,15 @@ export default function AllSchedules() {
                     FireToastEnum.DANGER,
                 );
             } finally {
-                fetchSchedules();
+                fetchStaffSchedules();
             }
         }
     };
 
-    const fetchSchedules = async () => {
+    const fetchStaffSchedules = async () => {
         try {
             const res = await fetch(
-                `${constants.SCHEDULES}?page=${pageNumber}&size=${constants.RESULTS_PER_PAGE}`,
+                `${constants.SCHEDULES}/staff/${id}?page=${pageNumber}&size=${constants.RESULTS_PER_PAGE}`,
                 {
                     method: 'GET',
                     headers: {
@@ -148,7 +152,7 @@ export default function AllSchedules() {
                 items: response?.items,
             });
 
-            setAllSchedules(scheduleArr);
+            setStaffAllSchedules(scheduleArr);
         } catch (err: any) {
             fireToast(
                 'There seems to be a problem',
@@ -159,14 +163,14 @@ export default function AllSchedules() {
     };
 
     useEffect(() => {
-        fetchSchedules();
+        fetchStaffSchedules();
 
         return () => {};
     }, [pageNumber]);
 
     return (
         <>
-            <Breadcrumb pageName="Schedules" />
+            <Breadcrumb pageName="Staff Schedules" />
             <div className="flex flex-col gap-6">
                 <div className="flex flex-row justify-end align-bottom">
                     <Link
@@ -232,7 +236,7 @@ export default function AllSchedules() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {AllSchedules.map((schedule) => {
+                                    {staffAllSchedules.map((schedule) => {
                                         return (
                                             <tr key={schedule.id}>
                                                 <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">

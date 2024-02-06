@@ -13,7 +13,7 @@ import { constants } from '@constants';
 export default function Locations() {
     const { user } = useContext(AuthContext) as UserContextProps;
 
-    const [location, setLocation] = useState<LocationProps[] | []>([]);
+    const [location, setLocation] = useState<LocationProps[]>([]);
     const [pageNumber, setPageNumber] = useState(1);
     const [apiResponse, setApiResponse] = useState<ApiResponse>({
         total: 0,

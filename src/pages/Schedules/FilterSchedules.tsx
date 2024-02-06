@@ -37,7 +37,7 @@ type FilterSelectedProps = {
 export default function FilterSchedules() {
     const { user } = useContext(AuthContext) as UserContextProps;
 
-    const [AllSchedules, setAllSchedules] = useState<ScheduleProps[] | []>([]);
+    const [AllSchedules, setAllSchedules] = useState<ScheduleProps[]>([]);
     const [selectedFilter, setSelectedFilter] = useState<FilterSelectedProps>({
         filter: 'today',
         date: null,

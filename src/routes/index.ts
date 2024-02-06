@@ -4,9 +4,6 @@ import { lazy } from 'react';
 const AllStaff = lazy(() => import('../pages/Staff/AllStaff'));
 const AddStaff = lazy(() => import('../pages/Staff/AddStaff'));
 const EditStaff = lazy(() => import('../pages/Staff/EditStaff'));
-// const ManageStudentCourses = lazy(
-//   () => import('../pages/Staff/ManageStudentCourses'),
-// );
 
 // Password
 const ChangeStudentPassword = lazy(
@@ -25,6 +22,9 @@ const EditSchedule = lazy(() => import('../pages/Schedules/EditSchedule'));
 const FilterSchedules = lazy(
     () => import('../pages/Schedules/FilterSchedules'),
 );
+const StaffSpecificSchedules = lazy(
+    () => import('../pages/Schedules/StaffSpecificSchedules'),
+);
 
 // Schedule Instances / Classes
 const AllScheduleInstances = lazy(
@@ -36,10 +36,9 @@ const EditScheduleInstance = lazy(
 const FilterScheduleInstance = lazy(
     () => import('../pages/Classes/FilterScheduleInstances'),
 );
-
-// Profile
-const Profile = lazy(() => import('../pages/Profile'));
-// const EditProfile = lazy(() => import('../pages/EditProfile'));
+const StaffSpecificTodayScheduleInstances = lazy(
+    () => import('../pages/Classes/StaffSpecificTodayScheduleInstances'),
+);
 
 const coreRoutes = [
     {
@@ -57,11 +56,6 @@ const coreRoutes = [
         title: 'Edit Staff',
         component: EditStaff,
     },
-    // {
-    //   path: '/students/manage/:id',
-    //   title: 'Manage Student Courses',
-    //   component: ManageStudentCourses,
-    // },
     {
         path: '/change/password/:id',
         title: 'Manage User Password',
@@ -103,6 +97,11 @@ const coreRoutes = [
         component: FilterSchedules,
     },
     {
+        path: '/schedules/staff/:id',
+        title: 'Staff Schedules',
+        component: StaffSpecificSchedules,
+    },
+    {
         path: '/classes/all',
         title: 'All Classes',
         component: AllScheduleInstances,
@@ -118,15 +117,10 @@ const coreRoutes = [
         component: FilterScheduleInstance,
     },
     {
-        path: '/profile',
-        title: 'Profile',
-        component: Profile,
+        path: '/classes/staff/today/:id',
+        title: 'Staff Today Classes',
+        component: StaffSpecificTodayScheduleInstances,
     },
-    // {
-    //   path: '/edit',
-    //   title: 'Edit Profile',
-    //   component: EditProfile,
-    // },
 ];
 
 export const routes = [...coreRoutes];

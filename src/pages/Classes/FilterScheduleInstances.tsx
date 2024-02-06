@@ -14,7 +14,10 @@ import { Breadcrumb, Pagination } from '@components';
 
 import { constants } from '@constants';
 
-import { TimestampConverter } from '../../utils/time';
+import {
+    convertUTCTimeToLocalTime,
+    TimestampConverter,
+} from '../../utils/time';
 
 type FilterSelectedProps = {
     filter: 'date' | 'today';
@@ -386,6 +389,18 @@ export default function FilterScheduleInstances() {
                                             className="min-w-[440px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11"
                                             colSpan={2}
                                         >
+                                            Start
+                                        </th>
+                                        <th
+                                            className="min-w-[440px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11"
+                                            colSpan={2}
+                                        >
+                                            End
+                                        </th>
+                                        <th
+                                            className="min-w-[440px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11"
+                                            colSpan={2}
+                                        >
                                             Date
                                         </th>
                                         <th className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
@@ -399,8 +414,9 @@ export default function FilterScheduleInstances() {
                                         </th>
                                     </tr>
                                     <tr>
-                                        {/* Staff Member */}
+                                        {/* Title */}
                                         <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white"></th>
+                                        {/* Staff Member */}
                                         <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white">
                                             Original
                                         </th>
@@ -408,6 +424,20 @@ export default function FilterScheduleInstances() {
                                             Current
                                         </th>
                                         {/* Location */}
+                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white">
+                                            Original
+                                        </th>
+                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white">
+                                            Current
+                                        </th>
+                                        {/* Start */}
+                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white">
+                                            Original
+                                        </th>
+                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white">
+                                            Current
+                                        </th>
+                                        {/* End */}
                                         <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white">
                                             Original
                                         </th>
@@ -493,6 +523,42 @@ export default function FilterScheduleInstances() {
                                                                     .location
                                                                     .title
                                                             }
+                                                        </p>
+                                                    </td>
+                                                    {/* Original Start */}
+                                                    <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+                                                        <p className="text-black dark:text-white">
+                                                            {convertUTCTimeToLocalTime(
+                                                                schedule_instance
+                                                                    .schedule
+                                                                    .start_time_in_utc,
+                                                            )}
+                                                        </p>
+                                                    </td>
+                                                    {/* Current Start */}
+                                                    <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+                                                        <p className="text-black dark:text-white">
+                                                            {convertUTCTimeToLocalTime(
+                                                                schedule_instance.start_time_in_utc,
+                                                            )}
+                                                        </p>
+                                                    </td>
+                                                    {/* Original End */}
+                                                    <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+                                                        <p className="text-black dark:text-white">
+                                                            {convertUTCTimeToLocalTime(
+                                                                schedule_instance
+                                                                    .schedule
+                                                                    .end_time_in_utc,
+                                                            )}
+                                                        </p>
+                                                    </td>
+                                                    {/* Current End */}
+                                                    <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+                                                        <p className="text-black dark:text-white">
+                                                            {convertUTCTimeToLocalTime(
+                                                                schedule_instance.end_time_in_utc,
+                                                            )}
                                                         </p>
                                                     </td>
                                                     {/* Origianl Date */}

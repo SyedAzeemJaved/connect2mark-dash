@@ -14,7 +14,10 @@ import { Breadcrumb, Pagination } from '@components';
 
 import { constants } from '@constants';
 
-import { TimestampConverter } from '../../utils/time';
+import {
+    convertUTCTimeToLocalTime,
+    TimestampConverter,
+} from '../../utils/time';
 
 export default function AllScheduleInstances() {
     const { user } = useContext(AuthContext) as UserContextProps;
@@ -204,6 +207,18 @@ export default function AllScheduleInstances() {
                                             className="min-w-[440px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11"
                                             colSpan={2}
                                         >
+                                            Start
+                                        </th>
+                                        <th
+                                            className="min-w-[440px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11"
+                                            colSpan={2}
+                                        >
+                                            End
+                                        </th>
+                                        <th
+                                            className="min-w-[440px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11"
+                                            colSpan={2}
+                                        >
                                             Date
                                         </th>
                                         <th className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
@@ -231,10 +246,21 @@ export default function AllScheduleInstances() {
                                         <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white">
                                             Current
                                         </th>
+                                        {/* Location */}
+                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white">
+                                            Original
+                                        </th>
                                         <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white">
                                             Current
                                         </th>
-                                        {/* Date */}
+                                        {/* Start */}
+                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white">
+                                            Original
+                                        </th>
+                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white">
+                                            Current
+                                        </th>
+                                        {/* End */}
                                         <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white">
                                             Original
                                         </th>
@@ -303,6 +329,42 @@ export default function AllScheduleInstances() {
                                                                     .location
                                                                     .title
                                                             }
+                                                        </p>
+                                                    </td>
+                                                    {/* Original Start */}
+                                                    <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+                                                        <p className="text-black dark:text-white">
+                                                            {convertUTCTimeToLocalTime(
+                                                                schedule_instance
+                                                                    .schedule
+                                                                    .start_time_in_utc,
+                                                            )}
+                                                        </p>
+                                                    </td>
+                                                    {/* Current Start */}
+                                                    <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+                                                        <p className="text-black dark:text-white">
+                                                            {convertUTCTimeToLocalTime(
+                                                                schedule_instance.start_time_in_utc,
+                                                            )}
+                                                        </p>
+                                                    </td>
+                                                    {/* Original End */}
+                                                    <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+                                                        <p className="text-black dark:text-white">
+                                                            {convertUTCTimeToLocalTime(
+                                                                schedule_instance
+                                                                    .schedule
+                                                                    .end_time_in_utc,
+                                                            )}
+                                                        </p>
+                                                    </td>
+                                                    {/* Current End */}
+                                                    <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+                                                        <p className="text-black dark:text-white">
+                                                            {convertUTCTimeToLocalTime(
+                                                                schedule_instance.end_time_in_utc,
+                                                            )}
                                                         </p>
                                                     </td>
                                                     {/* Original Date */}

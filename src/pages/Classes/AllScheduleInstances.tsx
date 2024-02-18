@@ -127,10 +127,12 @@ export default function AllScheduleInstances() {
                                         schedule_instance.staff_member
                                             .additional_details.designation,
                                 },
-                                created_at:
-                                    schedule_instance.staff_member.created_at,
-                                updated_at:
-                                    schedule_instance.staff_member.updated_at,
+                                created_at_in_utc:
+                                    schedule_instance.staff_member
+                                        .created_at_in_utc,
+                                updated_at_in_utc:
+                                    schedule_instance.staff_member
+                                        .updated_at_in_utc,
                             },
                             location: {
                                 id: schedule_instance.location.id,
@@ -140,15 +142,19 @@ export default function AllScheduleInstances() {
                                         .bluetooth_address,
                                 coordinates:
                                     schedule_instance.location.coordinates,
-                                created_at:
-                                    schedule_instance.location.created_at,
-                                updated_at:
-                                    schedule_instance.location.updated_at,
+                                created_at_in_utc:
+                                    schedule_instance.location
+                                        .created_at_in_utc,
+                                updated_at_in_utc:
+                                    schedule_instance.location
+                                        .updated_at_in_utc,
                             },
                             date: schedule_instance.date,
                             day: schedule_instance.day,
-                            created_at: schedule_instance.created_at,
-                            updated_at: schedule_instance.updated_at,
+                            created_at_in_utc:
+                                schedule_instance.created_at_in_utc,
+                            updated_at_in_utc:
+                                schedule_instance.updated_at_in_utc,
                         };
                     },
                 );
@@ -388,14 +394,14 @@ export default function AllScheduleInstances() {
                                                     <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                                                         <p className="text-black dark:text-white">
                                                             {TimestampConverter(
-                                                                schedule_instance.created_at,
+                                                                schedule_instance.created_at_in_utc,
                                                             )}
                                                         </p>
                                                     </td>
                                                     <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                                                         <p className="text-black dark:text-white">
                                                             {TimestampConverter(
-                                                                schedule_instance?.updated_at,
+                                                                schedule_instance?.updated_at_in_utc,
                                                             )}
                                                         </p>
                                                     </td>

@@ -230,8 +230,10 @@ export default function FilterSchedules() {
                                     schedule.staff_member.additional_details
                                         .designation,
                             },
-                            created_at: schedule.staff_member.created_at,
-                            updated_at: schedule.staff_member.updated_at,
+                            created_at_in_utc:
+                                schedule.staff_member.created_at_in_utc,
+                            updated_at_in_utc:
+                                schedule.staff_member.updated_at_in_utc,
                         },
                         location: {
                             id: schedule.location.id,
@@ -239,13 +241,15 @@ export default function FilterSchedules() {
                             bluetooth_address:
                                 schedule.location.bluetooth_address,
                             coordinates: schedule.location.coordinates,
-                            created_at: schedule.location.created_at,
-                            updated_at: schedule.location.updated_at,
+                            created_at_in_utc:
+                                schedule.location.created_at_in_utc,
+                            updated_at_in_utc:
+                                schedule.location.updated_at_in_utc,
                         },
                         date: schedule.date,
                         day: schedule.day,
-                        created_at: schedule.created_at,
-                        updated_at: schedule.updated_at,
+                        created_at_in_utc: schedule.created_at_in_utc,
+                        updated_at_in_utc: schedule.updated_at_in_utc,
                     };
                 },
             );
@@ -594,14 +598,14 @@ export default function FilterSchedules() {
                                                 <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                                                     <p className="text-black dark:text-white">
                                                         {TimestampConverter(
-                                                            schedule.created_at,
+                                                            schedule.created_at_in_utc,
                                                         )}
                                                     </p>
                                                 </td>
                                                 <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                                                     <p className="text-black dark:text-white">
                                                         {TimestampConverter(
-                                                            schedule?.updated_at,
+                                                            schedule?.updated_at_in_utc,
                                                         )}
                                                     </p>
                                                 </td>

@@ -20,8 +20,8 @@ type EditStaffProps = {
         department: string;
         designation: string;
     };
-    created_at: string;
-    updated_at: string | null;
+    created_at_in_utc: string;
+    updated_at_in_utc: string | null;
 };
 
 const blankStaff: EditStaffProps = {
@@ -33,8 +33,8 @@ const blankStaff: EditStaffProps = {
         department: 'not_specified',
         designation: 'not_specified',
     },
-    created_at: '',
-    updated_at: null,
+    created_at_in_utc: '',
+    updated_at_in_utc: null,
 };
 
 export default function EditStaff() {
@@ -74,8 +74,8 @@ export default function EditStaff() {
                 department: response.additional_details.department,
                 designation: response.additional_details.designation,
             },
-            created_at: response.created_at,
-            updated_at: response.updated_at,
+            created_at_in_utc: response.created_at_in_utc,
+            updated_at_in_utc: response.updated_at_in_utc,
         };
         setCurrentStaffMember(staff);
     };
@@ -474,7 +474,7 @@ export default function EditStaff() {
                             <div className="w-full sm:w-1/2">
                                 <label
                                     className="mb-3 block text-sm font-medium text-black dark:text-white"
-                                    htmlFor="created_at"
+                                    htmlFor="created_at_in_utc"
                                 >
                                     Joined
                                 </label>
@@ -482,11 +482,11 @@ export default function EditStaff() {
                                     <input
                                         className="w-full rounded border border-stroke bg-gray px-4.5 py-3 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
                                         type="text"
-                                        name="created_at"
-                                        id="created_at"
+                                        name="created_at_in_utc"
+                                        id="created_at_in_utc"
                                         readOnly
                                         value={TimestampConverter(
-                                            currentStaffMember.created_at,
+                                            currentStaffMember.created_at_in_utc,
                                         )}
                                     />
                                 </div>
@@ -495,7 +495,7 @@ export default function EditStaff() {
                             <div className="w-full sm:w-1/2">
                                 <label
                                     className="mb-3 block text-sm font-medium text-black dark:text-white"
-                                    htmlFor="updated_at"
+                                    htmlFor="updated_at_in_utc"
                                 >
                                     Last update
                                 </label>
@@ -504,11 +504,11 @@ export default function EditStaff() {
                                     <input
                                         className="w-full rounded border border-stroke bg-gray px-4.5 py-3 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
                                         type="text"
-                                        name="updated_at"
-                                        id="updated_at"
+                                        name="updated_at_in_utc"
+                                        id="updated_at_in_utc"
                                         readOnly
                                         value={TimestampConverter(
-                                            currentStaffMember?.updated_at,
+                                            currentStaffMember?.updated_at_in_utc,
                                         )}
                                     />
                                 </div>

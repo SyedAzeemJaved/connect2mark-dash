@@ -96,8 +96,8 @@ export default function Locations() {
                         title: item.title,
                         bluetooth_address: item.bluetooth_address,
                         coordinates: item.coordinates,
-                        created_at: item.created_at,
-                        updated_at: item.updated_at,
+                        created_at_in_utc: item.created_at_in_utc,
+                        updated_at_in_utc: item.updated_at_in_utc,
                     };
                 },
             );

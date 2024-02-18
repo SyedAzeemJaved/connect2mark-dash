@@ -11,8 +11,8 @@ const blankUser: AdminProps = {
     full_name: '',
     email: '',
     accessToken: '',
-    created_at: '',
-    updated_at: null,
+    created_at_in_utc: '',
+    updated_at_in_utc: null,
     authenticated: false,
     additional_details: null,
 };
@@ -54,8 +54,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     email: response.email,
                     accessToken: t,
                     authenticated: true,
-                    created_at: response.created_at,
-                    updated_at: response.updated_at,
+                    created_at_in_utc: response.created_at_in_utc,
+                    updated_at_in_utc: response.updated_at_in_utc,
                     additional_details: null,
                 });
             } catch (err: any) {

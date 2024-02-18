@@ -2,8 +2,8 @@ interface BasicUser {
     readonly id: number;
     readonly full_name: string;
     readonly email: string;
-    readonly created_at: string;
-    readonly updated_at: string | null;
+    readonly created_at_in_utc: string;
+    readonly updated_at_in_utc: string | null;
 }
 
 export interface AdditionalDetail {
@@ -41,8 +41,8 @@ export interface LocationProps {
     readonly title: string;
     readonly bluetooth_address: string;
     readonly coordinates: string;
-    readonly created_at: string;
-    readonly updated_at: string | null;
+    readonly created_at_in_utc: string;
+    readonly updated_at_in_utc: string | null;
 }
 
 export interface ScheduleProps {
@@ -67,8 +67,8 @@ export interface ScheduleProps {
         | 'saturday'
         | 'sunday';
 
-    readonly created_at: string;
-    readonly updated_at: string | null;
+    readonly created_at_in_utc: string;
+    readonly updated_at_in_utc: string | null;
 }
 
 export interface ScheduleInstanceProps {
@@ -82,19 +82,17 @@ export interface ScheduleInstanceProps {
     readonly staff_member: StaffProps;
     readonly location: LocationProps;
 
-    readonly date: string | null;
-    readonly day:
-        | 'monday'
-        | 'tuesday'
-        | 'wednesday'
-        | 'thursday'
-        | 'friday'
-        | 'saturday'
-        | 'sunday';
+    readonly date: string;
 
-    readonly created_at: string;
-    readonly updated_at: string | null;
+    readonly created_at_in_utc: string;
+    readonly updated_at_in_utc: string | null;
 }
+
+export type AttendanceResultProps = {
+    schedule_instance: ScheduleInstanceProps;
+    attendance_status: 'present' | 'late' | null;
+    created_at_in_utc_in_utc: string | null;
+};
 
 // API
 export type ApiResponse = {

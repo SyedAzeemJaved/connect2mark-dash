@@ -19,8 +19,8 @@ export default function EditLocation() {
         title: '',
         bluetooth_address: '',
         coordinates: '',
-        created_at: '',
-        updated_at: null,
+        created_at_in_utc: '',
+        updated_at_in_utc: null,
     });
 
     const handleChange = (e: React.ChangeEvent) => {
@@ -108,8 +108,8 @@ export default function EditLocation() {
                 title: response.title,
                 bluetooth_address: response.bluetooth_address,
                 coordinates: response.coordinates,
-                created_at: response.created_at,
-                updated_at: response.updated_at,
+                created_at_in_utc: response.created_at_in_utc,
+                updated_at_in_utc: response.updated_at_in_utc,
             });
         } catch (err: any) {
             fireToast(

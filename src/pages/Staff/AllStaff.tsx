@@ -108,8 +108,8 @@ export default function AllStaff() {
                         id: staff.id,
                         full_name: staff.full_name,
                         email: staff.email,
-                        created_at: staff.created_at,
-                        updated_at: staff.updated_at,
+                        created_at_in_utc: staff.created_at_in_utc,
+                        updated_at_in_utc: staff.updated_at_in_utc,
                         additional_details: {
                             phone: staff.additional_details.phone,
                             department: staff.additional_details.department,
@@ -215,14 +215,14 @@ export default function AllStaff() {
                                                 <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                                                     <p className="text-black dark:text-white">
                                                         {TimestampConverter(
-                                                            staff.created_at,
+                                                            staff.created_at_in_utc,
                                                         )}
                                                     </p>
                                                 </td>
                                                 <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                                                     <p className="text-black dark:text-white">
                                                         {TimestampConverter(
-                                                            staff?.updated_at,
+                                                            staff?.updated_at_in_utc,
                                                         )}
                                                     </p>
                                                 </td>

@@ -1,0 +1,78 @@
+{
+    "mapwidth": "1136",
+    "mapheight": "717",
+    "levels": [
+        {
+            "id": "map",
+            "title": "SSUET Map",
+            "map": "/src/mapplic/map/map.svg",
+            "minimap": "/src/mapplic/map/map.jpg",
+            "locations": [
+                {
+                    "id": "h-block",
+                    "title": "H Block",
+                    "pin": "hidden",
+                    "style": "defaultstyle",
+                    "x": "0.2303",
+                    "y": "0.2331"
+                },
+                {
+                    "id": "g-block",
+                    "title": "G Block",
+                    "pin": "hidden",
+                    "style": "defaultstyle",
+                    "x": "0.4402",
+                    "y": "0.2394"
+                },
+                {
+                    "id": "f-block",
+                    "title": "F Block",
+                    "pin": "hidden",
+                    "style": "defaultstyle",
+                    "x": "0.5338",
+                    "y": "0.2424"
+                },
+                {
+                    "id": "e-block",
+                    "title": "E Block",
+                    "pin": "hidden",
+                    "style": "defaultstyle",
+                    "x": "0.6005",
+                    "y": "0.2540"
+                },
+                {
+                    "id": "d-block",
+                    "title": "D Block",
+                    "pin": "hidden",
+                    "style": "defaultstyle",
+                    "x": "0.6818",
+                    "y": "0.2424"
+                },
+                {
+                    "id": "c-block",
+                    "title": "C Block",
+                    "pin": "hidden",
+                    "style": "defaultstyle",
+                    "x": "0.7793",
+                    "y": "0.2210"
+                },
+                {
+                    "id": "b-block",
+                    "title": "B Block",
+                    "pin": "hidden",
+                    "style": "defaultstyle",
+                    "x": "0.7928",
+                    "y": "0.3879"
+                },
+                {
+                    "id": "a-block",
+                    "title": "A Block",
+                    "pin": "hidden",
+                    "style": "defaultstyle",
+                    "x": "0.7890",
+                    "y": "0.5715"
+                }
+            ]
+        }
+    ]
+}

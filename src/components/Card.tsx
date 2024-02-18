@@ -3,7 +3,7 @@ interface CardOneProps {
     description: string | number;
 }
 
-export const CardOne = ({ title, description }: CardOneProps) => {
+export const Card = ({ title, description }: CardOneProps) => {
     return (
         <div className="rounded-sm border border-stroke bg-white px-7.5 py-6 shadow-default dark:border-strokedark dark:bg-boxdark">
             <div className="mt-4 flex items-end justify-between">

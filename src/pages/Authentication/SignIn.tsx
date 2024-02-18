@@ -65,8 +65,8 @@ const SignIn = () => {
                     email: response.user.email,
                     accessToken: response.access_token,
                     authenticated: true,
-                    created_at: response.user.created_at,
-                    updated_at: response.user.updated_at,
+                    created_at_in_utc: response.user.created_at_in_utc,
+                    updated_at_in_utc: response.user.updated_at_in_utc,
                     additional_details: null,
                 });
             } else {

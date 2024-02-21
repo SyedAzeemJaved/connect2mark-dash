@@ -253,11 +253,14 @@ const Overview = () => {
                     graphData={graphData}
                     handleSetStaffMember={handleSetStaffMember}
                 />
-                <section id="map-section" className="inner over">
-                    <div>
-                        <Mapplic />
-                    </div>
-                </section>
+
+                <div className="col-span-12 rounded-sm border border-stroke bg-white p-7.5 shadow-default dark:border-strokedark dark:bg-boxdark xl:col-span-4">
+                    <section id="map-section" className="inner over">
+                        <div>
+                            <Mapplic />
+                        </div>
+                    </section>
+                </div>
             </div>
         </>
     );

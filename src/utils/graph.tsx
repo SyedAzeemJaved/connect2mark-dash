@@ -9,5 +9,9 @@ export const countTotalClassesForADate = (
 export const countAttendedClassesForADate = (
     classesArr: AttendanceResultProps[],
 ): number => {
-    return classesArr.map((cls) => cls.attendance_status !== null).length;
+    const valuesArr = classesArr.map((i) => i.attendance_status);
+    const countOfNonNullValues = valuesArr.filter(
+        (value) => value !== null,
+    ).length;
+    return countOfNonNullValues;
 };

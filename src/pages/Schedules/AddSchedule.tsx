@@ -13,7 +13,7 @@ import {
     UserContextProps,
 } from '@types';
 
-import { convertTo24HourUTC, convertToUTCDate } from '../../utils/time';
+import { convertTo24HourUTC, convertToUTCDate } from '@utils';
 
 type CreateScheduleProps = {
     title: string;

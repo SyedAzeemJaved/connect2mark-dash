@@ -14,10 +14,7 @@ import { Breadcrumb, Pagination } from '@components';
 
 import { constants } from '@constants';
 
-import {
-    convertUTCTimeToLocalTime,
-    TimestampConverter,
-} from '../../utils/time';
+import { convertUTCTimeToLocalTime, TimestampConverter } from '@utils';
 
 export default function AllScheduleInstances() {
     const { user } = useContext(AuthContext) as UserContextProps;
@@ -150,7 +147,6 @@ export default function AllScheduleInstances() {
                                         .updated_at_in_utc,
                             },
                             date: schedule_instance.date,
-                            day: schedule_instance.day,
                             created_at_in_utc:
                                 schedule_instance.created_at_in_utc,
                             updated_at_in_utc:

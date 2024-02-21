@@ -2,15 +2,20 @@ import { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { AuthContext } from '@context';
-import { StaffProps, ApiResponse, UserContextProps } from '@types';
+
+import {
+    StaffProps,
+    ApiResponse,
+    UserContextProps,
+    FireToastEnum,
+} from '@types';
 
 import { fireToast } from '@hooks';
 import { Breadcrumb, Pagination } from '@components';
 
-import { TimestampConverter } from '../../utils/time';
-
-import { FireToastEnum } from '../../types/enums';
 import { constants } from '@constants';
+
+import { TimestampConverter } from '@utils';
 
 export default function AllStaff() {
     const { user } = useContext(AuthContext) as UserContextProps;

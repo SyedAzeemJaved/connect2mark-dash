@@ -2,14 +2,15 @@ import { useState, useEffect, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { AuthContext } from '@context';
+
 import { FireToastEnum, UserContextProps } from '@types';
 
 import { fireToast } from '@hooks';
 import { Breadcrumb } from '@components';
 
-import { nullIfEmpty } from '../../utils/validation';
-import { TimestampConverter } from '../../utils/time';
-import { constants } from '../../constants';
+import { constants } from '@constants';
+
+import { nullIfEmpty, TimestampConverter } from '@utils';
 
 type EditStaffProps = {
     id: number;

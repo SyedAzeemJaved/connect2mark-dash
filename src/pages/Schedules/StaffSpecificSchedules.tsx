@@ -14,10 +14,7 @@ import { Breadcrumb, Pagination } from '@components';
 
 import { constants } from '@constants';
 
-import {
-    convertUTCTimeToLocalTime,
-    TimestampConverter,
-} from '../../utils/time';
+import { convertUTCTimeToLocalTime, TimestampConverter } from '@utils';
 
 export default function StaffSpecificSchedules() {
     const { id } = useParams();

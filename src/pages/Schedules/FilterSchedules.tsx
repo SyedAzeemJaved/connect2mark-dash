@@ -18,7 +18,7 @@ import {
     getCurrentDayString,
     convertUTCTimeToLocalTime,
     TimestampConverter,
-} from '../../utils/time';
+} from '@utils';
 
 type FilterSelectedProps = {
     filter: 'date' | 'day' | 'today';

@@ -14,10 +14,7 @@ import { Breadcrumb, Pagination } from '@components';
 
 import { constants } from '@constants';
 
-import {
-    convertUTCTimeToLocalTime,
-    TimestampConverter,
-} from '../../utils/time';
+import { convertUTCTimeToLocalTime, TimestampConverter } from '@utils';
 
 export default function StaffSpecificTodayScheduleInstances() {
     const { id } = useParams();
@@ -151,7 +148,6 @@ export default function StaffSpecificTodayScheduleInstances() {
                                         .updated_at_in_utc,
                             },
                             date: schedule_instance.date,
-                            day: schedule_instance.day,
                             created_at_in_utc:
                                 schedule_instance.created_at_in_utc,
                             updated_at_in_utc:

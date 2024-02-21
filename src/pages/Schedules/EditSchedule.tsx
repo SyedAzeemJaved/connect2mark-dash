@@ -14,7 +14,7 @@ import { Breadcrumb } from '@components';
 
 import { constants } from '@constants';
 
-import { convertTo24HourUTC, convertToUTCDate } from '../../utils/time';
+import { convertTo24HourUTC, convertToUTCDate } from '@utils';
 
 type EditScheduleProps = {
     id: number;

@@ -1,7 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { ApexOptions } from 'apexcharts';
 import ReactApexChart from 'react-apexcharts';
+
+import { AttendanceResultProps } from '@types';
+
+import {
+    countTotalClassesForADate,
+    countAttendedClassesForADate,
+} from '@utils';
 
 const options: ApexOptions = {
     legend: {
@@ -82,20 +89,7 @@ const options: ApexOptions = {
     },
     xaxis: {
         type: 'category',
-        categories: [
-            'Sep',
-            // 'Oct',
-            // 'Nov',
-            // 'Dec',
-            // 'Jan',
-            // 'Feb',
-            // 'Mar',
-            // 'Apr',
-            // 'May',
-            // 'Jun',
-            // 'Jul',
-            // 'Aug',
-        ],
+        categories: [],
         axisBorder: {
             show: false,
         },
@@ -122,34 +116,53 @@ interface ChartOneState {
 }
 
 export const Graph = ({
-    fetchDataRange,
-    handleFetchDataChange,
+    fetchRange,
+    graphData,
+    handleFetchRangeChange,
 }: {
-    fetchDataRange: 'week' | 'month';
-    handleFetchDataChange: () => void;
+    fetchRange: 'week' | 'month';
+    graphData: Record<string, AttendanceResultProps[]>;
+    handleFetchRangeChange: () => void;
 }) => {
     const [state, setState] = useState<ChartOneState>({
         series: [
             {
                 name: 'Total',
-                data: [4],
-                // data: [23, 11, 22, 27, 13, 22, 37, 21, 44, 22, 30, 45],
+                data: [],
             },
-
             {
                 name: 'Attended',
-                data: [3],
-                // data: [30, 25, 36, 30, 45, 35, 64, 52, 59, 36, 39, 51],
+                data: [],
             },
         ],
     });
 
-    const handleReset = () => {
-        setState((prevState) => ({
-            ...prevState,
+    useEffect(() => {
+        setState((prev) => ({
+            series: [
+                {
+                    name: prev.series[0].name,
+                    data: Object.values(graphData).map((item) =>
+                        countTotalClassesForADate(item),
+                    ),
+                },
+                {
+                    name: prev.series[1].name,
+                    data: Object.values(graphData).map((item) =>
+                        countAttendedClassesForADate(item),
+                    ),
+                },
+            ],
         }));
-    };
-    handleReset;
+
+        return () => {};
+    }, [graphData]);
+
+    // const handleReset = () => {
+    //     setState((prevState) => ({
+    //         ...prevState,
+    //     }));
+    // };
 
     return (
         <div className="col-span-12 rounded-sm border border-stroke bg-white px-5 pb-5 pt-7.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-8">
@@ -163,7 +176,6 @@ export const Graph = ({
                             <p className="font-semibold text-primary">
                                 Total Classes
                             </p>
-                            <p className="text-sm font-medium">Date Range</p>
                         </div>
                     </div>
                     <div className="flex min-w-47.5">
@@ -180,14 +192,14 @@ export const Graph = ({
                 <div className="flex w-full max-w-45 justify-end">
                     <div className="inline-flex items-center rounded-md bg-whiter p-1.5 dark:bg-meta-4">
                         <button
-                            className={`rounded px-3 py-1 text-xs font-medium text-black hover:bg-white hover:shadow-card dark:text-white dark:hover:bg-boxdark ${fetchDataRange === 'week' ? 'bg-white shadow-card dark:bg-boxdark' : null}`}
-                            onClick={handleFetchDataChange}
+                            className={`rounded px-3 py-1 text-xs font-medium text-black hover:bg-white hover:shadow-card dark:text-white dark:hover:bg-boxdark ${fetchRange === 'week' ? 'bg-white shadow-card dark:bg-boxdark' : null}`}
+                            onClick={handleFetchRangeChange}
                         >
                             Week
                         </button>
                         <button
-                            className={`rounded px-3 py-1 text-xs font-medium text-black hover:bg-white hover:shadow-card dark:text-white dark:hover:bg-boxdark ${fetchDataRange === 'month' ? 'bg-white shadow-card dark:bg-boxdark' : null}`}
-                            onClick={handleFetchDataChange}
+                            className={`rounded px-3 py-1 text-xs font-medium text-black hover:bg-white hover:shadow-card dark:text-white dark:hover:bg-boxdark ${fetchRange === 'month' ? 'bg-white shadow-card dark:bg-boxdark' : null}`}
+                            onClick={handleFetchRangeChange}
                         >
                             Month
                         </button>
@@ -198,7 +210,13 @@ export const Graph = ({
             <div>
                 <div className="-ml-5">
                     <ReactApexChart
-                        options={options}
+                        options={{
+                            ...options,
+                            xaxis: {
+                                ...options.xaxis,
+                                categories: Object.keys(graphData),
+                            },
+                        }}
                         series={state.series}
                         type="area"
                         height={350}

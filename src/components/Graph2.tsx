@@ -1,9 +1,14 @@
-import { SelectHTMLAttributes, useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { ApexOptions } from 'apexcharts';
 import ReactApexChart from 'react-apexcharts';
 
-import { StaffProps } from '@types';
+import { AttendanceResultProps, StaffProps } from '@types';
+
+import {
+    countTotalClassesForADate,
+    countAttendedClassesForADate,
+} from '@utils';
 
 const options: ApexOptions = {
     colors: ['#3C50E0', '#80CAEE'],
@@ -19,7 +24,6 @@ const options: ApexOptions = {
             enabled: false,
         },
     },
-
     responsive: [
         {
             breakpoint: 1536,
@@ -45,23 +49,37 @@ const options: ApexOptions = {
     dataLabels: {
         enabled: false,
     },
-
-    xaxis: {
-        categories: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
-    },
     legend: {
         position: 'top',
         horizontalAlign: 'left',
         fontFamily: 'Satoshi',
         fontWeight: 500,
         fontSize: '14px',
-
         markers: {
             radius: 99,
         },
     },
     fill: {
         opacity: 1,
+    },
+    xaxis: {
+        type: 'category',
+        categories: [],
+        axisBorder: {
+            show: false,
+        },
+        axisTicks: {
+            show: false,
+        },
+    },
+    yaxis: {
+        title: {
+            style: {
+                fontSize: '0px',
+            },
+        },
+        min: 0,
+        max: 10,
     },
 };
 
@@ -74,30 +92,52 @@ interface ChartTwoState {
 
 export const Graph2 = ({
     allStaffMembers,
+    graphData,
     handleSetStaffMember,
 }: {
     allStaffMembers: StaffProps[];
+    graphData: Record<string, AttendanceResultProps[]>;
     handleSetStaffMember: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 }) => {
     const [state, setState] = useState<ChartTwoState>({
         series: [
             {
                 name: 'Total',
-                data: [44, 55, 41, 67, 22, 43, 65],
+                data: [],
             },
             {
                 name: 'Attended',
-                data: [13, 23, 20, 8, 13, 27, 15],
+                data: [],
             },
         ],
     });
 
-    const handleReset = () => {
-        setState((prevState) => ({
-            ...prevState,
+    useEffect(() => {
+        setState((prev) => ({
+            series: [
+                {
+                    name: prev.series[0].name,
+                    data: Object.values(graphData).map((item) =>
+                        countTotalClassesForADate(item),
+                    ),
+                },
+                {
+                    name: prev.series[1].name,
+                    data: Object.values(graphData).map((item) =>
+                        countAttendedClassesForADate(item),
+                    ),
+                },
+            ],
         }));
-    };
-    handleReset;
+
+        return () => {};
+    }, [graphData]);
+
+    // const handleReset = () => {
+    //     setState((prevState) => ({
+    //         ...prevState,
+    //     }));
+    // };
 
     return (
         <div className="col-span-12 rounded-sm border border-stroke bg-white p-7.5 shadow-default dark:border-strokedark dark:bg-boxdark xl:col-span-4">
@@ -154,7 +194,13 @@ export const Graph2 = ({
             <div>
                 <div id="chartTwo" className="-mb-9 -ml-5">
                     <ReactApexChart
-                        options={options}
+                        options={{
+                            ...options,
+                            xaxis: {
+                                ...options.xaxis,
+                                categories: Object.keys(graphData),
+                            },
+                        }}
                         series={state.series}
                         type="bar"
                         height={350}

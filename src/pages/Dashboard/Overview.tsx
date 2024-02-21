@@ -1,5 +1,7 @@
 import { useState, useContext, useEffect, ChangeEvent } from 'react';
 
+import { Mapplic } from '../../components/Mapplic';
+
 import { AuthContext } from '@context';
 
 import {
@@ -14,7 +16,7 @@ import { Card, Graph, Graph2 } from '@components';
 
 import { constants } from '@constants';
 
-import { Mapplic } from '../../components/Mapplic';
+import { daysFromToday, formatDateToApiFormatString } from '@utils';
 
 interface DashboardOverviewProps {
     staffMembersCount: string | number;
@@ -23,10 +25,10 @@ interface DashboardOverviewProps {
     scheduleInstancesCount: string | number;
 }
 
-interface GraphProps {
+interface GraphQueryProps {
     selectedStaffMember: StaffProps | null;
-    startDate: string | null;
-    endDate: string | null;
+    startDate: Date | null;
+    fetchRange: 'week' | 'month';
 }
 
 const Overview = () => {
@@ -38,16 +40,17 @@ const Overview = () => {
         schedulesCount: 'Fetching',
         scheduleInstancesCount: 'Fetching',
     });
-    const [graphData, setGraphData] = useState<GraphProps>({
+    const [graphData, setGraphData] = useState<
+        Record<string, AttendanceResultProps[]>
+    >({});
+
+    const [graphQueryValues, setGraphQueryValues] = useState<GraphQueryProps>({
         selectedStaffMember: null,
-        startDate: null,
-        endDate: null,
+        startDate: daysFromToday(7),
+        fetchRange: 'week',
     });
+
     const [allStaffMembers, setAllStaffMembers] = useState<StaffProps[]>([]);
-    const [fetchDataRange, setFetchDataRange] = useState<'week' | 'month'>(
-        'week',
-    );
-    const [test, setTest] = useState<AttendanceResultProps[]>([]);
 
     const fetchStats = async () => {
         try {
@@ -125,7 +128,7 @@ const Overview = () => {
 
     useEffect(() => {
         if (allStaffMembers.length > 0) {
-            setGraphData((prev) => ({
+            setGraphQueryValues((prev) => ({
                 ...prev,
                 selectedStaffMember: allStaffMembers[0],
             }));
@@ -134,11 +137,11 @@ const Overview = () => {
 
     useEffect(() => {
         (async () => {
-            if (graphData.selectedStaffMember?.id) {
+            if (graphQueryValues.selectedStaffMember?.id) {
                 try {
                     const res = await fetch(
                         constants.ATTENDANCE_RESULT +
-                            `/${graphData.selectedStaffMember.id}`,
+                            `/${graphQueryValues.selectedStaffMember.id}`,
                         {
                             method: 'POST',
                             headers: {
@@ -147,8 +150,14 @@ const Overview = () => {
                                 Authorization: `Bearer ${user.accessToken}`,
                             },
                             body: JSON.stringify({
-                                start_date: '2024-02-03',
-                                end_date: '2024-02-18',
+                                start_date: formatDateToApiFormatString(
+                                    graphQueryValues.fetchRange === 'week'
+                                        ? daysFromToday(-7)
+                                        : daysFromToday(-30),
+                                ),
+                                end_date: formatDateToApiFormatString(
+                                    new Date(),
+                                ),
                             }),
                         },
                     );
@@ -162,7 +171,7 @@ const Overview = () => {
                                 : 'Something went wrong',
                         );
 
-                    setTest(response.items);
+                    setGraphData(groupAttendanceResultsByDate(response.items));
                 } catch (err: any) {
                     fireToast(
                         'There seems to be a problem',
@@ -172,7 +181,7 @@ const Overview = () => {
                 }
             }
         })();
-    }, [graphData]);
+    }, [graphQueryValues]);
 
     const handleSetStaffMember = (e: ChangeEvent<HTMLSelectElement>) => {
         const staffMemeber = allStaffMembers.find(
@@ -180,15 +189,11 @@ const Overview = () => {
         );
 
         if (staffMemeber) {
-            setGraphData((prev) => ({
+            setGraphQueryValues((prev) => ({
                 ...prev,
                 selectedStaffMember: staffMemeber,
             }));
         }
-    };
-
-    const handleFetchDataChange = () => {
-        setFetchDataRange((prev) => (prev === 'week' ? 'month' : 'week'));
     };
 
     const groupAttendanceResultsByDate = (
@@ -197,7 +202,7 @@ const Overview = () => {
         const groupedByDate: Record<string, AttendanceResultProps[]> = {};
 
         attendanceResults.forEach((item) => {
-            const date: string = item.schedule_instance!.date;
+            const date: string = item.schedule_instance.date;
 
             if (!groupedByDate[date]) {
                 groupedByDate[date] = [];
@@ -207,6 +212,13 @@ const Overview = () => {
         });
 
         return groupedByDate;
+    };
+
+    const handleFetchRangeChange = () => {
+        setGraphQueryValues((prev) => ({
+            ...prev,
+            fetchRange: prev.fetchRange === 'week' ? 'month' : 'week',
+        }));
     };
 
     return (
@@ -232,11 +244,13 @@ const Overview = () => {
 
             <div className="mt-7.5 grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
                 <Graph
-                    fetchDataRange={fetchDataRange}
-                    handleFetchDataChange={handleFetchDataChange}
+                    fetchRange={graphQueryValues.fetchRange}
+                    graphData={graphData}
+                    handleFetchRangeChange={handleFetchRangeChange}
                 />
                 <Graph2
                     allStaffMembers={allStaffMembers}
+                    graphData={graphData}
                     handleSetStaffMember={handleSetStaffMember}
                 />
                 <section id="map-section" className="inner over">

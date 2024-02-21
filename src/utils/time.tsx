@@ -1,5 +1,13 @@
 import { formatDistanceToNow } from 'date-fns';
 
+const MILLISECONDS_IN_A_DAY = 86400000;
+
+export const daysFromToday = (days: number): Date => {
+    const today = new Date();
+
+    return new Date(today.getTime() + days * MILLISECONDS_IN_A_DAY);
+};
+
 export function TimestampConverter(timestampValue: string | null) {
     if (timestampValue && typeof (timestampValue === 'string')) {
         const date = new Date(timestampValue);
@@ -88,3 +96,9 @@ export function getCurrentDayString(
     }
     return null;
 }
+
+export const formatDateToApiFormatString = (date: Date): string => {
+    const [year, month, _date] = date.toISOString().slice(0, 10).split('-');
+
+    return `${year}-${month}-${_date}`;
+};

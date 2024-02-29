@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'https://connect2mark-api-production.up.railway.app';
 
 export const constants = {
     TOKEN: `${API_BASE_URL}/token`,

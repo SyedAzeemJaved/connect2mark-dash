@@ -27,6 +27,7 @@
             "@constants": ["constants/index.ts"],
             "@context": ["context/index.ts"],
             "@types": ["types/index.ts"],
+            "@enums": ["enums/index.ts"],
             "@utils": ["utils/index.ts"],
             "@hooks": ["hooks/index.ts"],
             "@layout": ["layout/index.ts"],

@@ -3,8 +3,6 @@ import { useParams } from 'react-router-dom';
 
 import { AuthContext } from '@context';
 
-import { FireToastEnum, UserContextProps } from '@types';
-
 import { fireToast } from '@hooks';
 import { Breadcrumb } from '@components';
 
@@ -12,62 +10,64 @@ import { constants } from '@constants';
 
 import { nullIfEmpty, TimestampConverter } from '@utils';
 
-type EditStaffProps = {
-    id: number;
-    full_name: string;
-    email: string;
+import { FireToastEnum, AcademicUserTypeEnum } from '@enums';
+
+import type { UserContextProps } from '@types';
+import type { EditPageProps } from './types';
+
+type EditUserProps = {
+    full_name: string | undefined;
+    email: string | undefined;
     additional_details: {
-        phone: string | null;
-        department: string;
-        designation: string;
+        phone: string | undefined;
+        department: string | undefined;
+        designation: string | undefined;
     };
-    created_at_in_utc: string;
-    updated_at_in_utc: string | null;
+    readonly created_at_in_utc: string;
+    readonly updated_at_in_utc: string | null;
 };
 
-const blankStaff: EditStaffProps = {
-    id: 0,
-    full_name: '',
-    email: '',
-    additional_details: {
-        phone: null,
-        department: 'not_specified',
-        designation: 'not_specified',
-    },
-    created_at_in_utc: '',
-    updated_at_in_utc: null,
-};
-
-export default function EditStaff() {
+export default function EditAcademicUser(props: EditPageProps) {
     const { id } = useParams();
+
+    if (!id) return;
 
     const { user, setLoading } = useContext(AuthContext) as UserContextProps;
 
-    const [currentStaffMember, setCurrentStaffMember] =
-        useState<EditStaffProps>(blankStaff);
+    const [currentData, setCurrentData] = useState<EditUserProps>({
+        full_name: undefined,
+        email: undefined,
+        additional_details: {
+            phone: undefined,
+            department: undefined,
+            designation: undefined,
+        },
+        created_at_in_utc: '',
+        updated_at_in_utc: null,
+    });
 
     const handleChange = (e: React.ChangeEvent) => {
         const target = e.target as HTMLInputElement;
-        setCurrentStaffMember({
-            ...currentStaffMember,
+        setCurrentData({
+            ...currentData,
             [target.name]: target.value,
         });
     };
 
     const handleChangeAdditionalDetails = (e: React.ChangeEvent) => {
         const target = e.target as HTMLInputElement;
-        setCurrentStaffMember({
-            ...currentStaffMember,
+
+        setCurrentData({
+            ...currentData,
             additional_details: {
-                ...currentStaffMember.additional_details,
+                ...currentData.additional_details,
                 [target.name]: target.value,
             },
         });
     };
 
-    const handleSetStaff = (response: any) => {
-        const staff: EditStaffProps = {
-            id: response.id,
+    const handleSetData = (response: any) => {
+        setCurrentData({
             full_name: response.full_name,
             email: response.email,
             additional_details: {
@@ -77,15 +77,14 @@ export default function EditStaff() {
             },
             created_at_in_utc: response.created_at_in_utc,
             updated_at_in_utc: response.updated_at_in_utc,
-        };
-        setCurrentStaffMember(staff);
+        });
     };
 
     const handleSubmit = async (e: React.MouseEvent) => {
         try {
             e.preventDefault;
 
-            if (!currentStaffMember.full_name || !currentStaffMember.email) {
+            if (!currentData.full_name || !currentData.email) {
                 throw new Error('Please fill all required input fields');
             }
 
@@ -99,23 +98,29 @@ export default function EditStaff() {
                     Authorization: `Bearer ${user.accessToken}`,
                 },
                 body: JSON.stringify({
-                    full_name: currentStaffMember.full_name,
-                    email: currentStaffMember.email,
+                    full_name: currentData.full_name,
+                    email: currentData.email,
                     additional_details: {
                         phone: nullIfEmpty(
-                            currentStaffMember.additional_details.phone,
+                            currentData.additional_details.phone,
                         ),
-                        department:
-                            currentStaffMember.additional_details.department,
+                        department: nullIfEmpty(
+                            currentData.additional_details.department,
+                        ),
                         designation:
-                            currentStaffMember.additional_details.designation,
+                            props?.type === AcademicUserTypeEnum.STUDENT
+                                ? null
+                                : nullIfEmpty(
+                                      currentData.additional_details
+                                          .designation,
+                                  ),
                     },
                 }),
             });
 
             const response = await res.json();
 
-            if (res.status !== 200)
+            if (!res.ok)
                 throw new Error(
                     typeof response?.detail === 'string'
                         ? response.detail
@@ -124,7 +129,7 @@ export default function EditStaff() {
 
             fireToast(
                 'Success',
-                'Staff member edited successfully',
+                'User edited successfully',
                 FireToastEnum.SUCCESS,
             );
         } catch (err: any) {
@@ -138,7 +143,7 @@ export default function EditStaff() {
         }
     };
 
-    const fetchStaffMember = async (id: number) => {
+    const fetchAcademicUser = async (id: number) => {
         try {
             const res = await fetch(`${constants.USERS}/${id}`, {
                 method: 'GET',
@@ -150,14 +155,14 @@ export default function EditStaff() {
 
             const response = await res.json();
 
-            if (res.status !== 200)
+            if (!res.ok)
                 throw new Error(
                     typeof response?.detail === 'string'
                         ? response.detail
                         : 'Something went wrong',
                 );
 
-            handleSetStaff(response);
+            handleSetData(response);
         } catch (err: any) {
             fireToast(
                 'There seems to be a problem',
@@ -169,7 +174,7 @@ export default function EditStaff() {
 
     useEffect(() => {
         if (id) {
-            fetchStaffMember(parseInt(id));
+            fetchAcademicUser(parseInt(id));
         }
 
         return () => {};
@@ -177,11 +182,16 @@ export default function EditStaff() {
 
     return (
         <>
-            <Breadcrumb pageName="Edit Staff Member" />
+            <Breadcrumb
+                pageName={`Edit ${props?.type === AcademicUserTypeEnum.STUDENT ? 'Student' : 'Teacher'}`}
+            />
             <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
                 <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
                     <h3 className="font-medium text-black dark:text-white">
-                        Staff Member Information
+                        {props?.type === AcademicUserTypeEnum.STUDENT
+                            ? 'Student'
+                            : 'Teacher'}{' '}
+                        Information
                     </h3>
                 </div>
                 <div className="p-7">
@@ -227,7 +237,7 @@ export default function EditStaff() {
                                         name="full_name"
                                         id="full_name"
                                         placeholder="Enter full name"
-                                        value={currentStaffMember.full_name}
+                                        value={currentData.full_name}
                                         onChange={(e) => handleChange(e)}
                                     />
                                 </div>
@@ -272,7 +282,7 @@ export default function EditStaff() {
                                         name="email"
                                         id="email"
                                         placeholder="Enter email address"
-                                        value={currentStaffMember.email}
+                                        value={currentData.email}
                                         onChange={(e) => handleChange(e)}
                                     />
                                 </div>
@@ -293,8 +303,8 @@ export default function EditStaff() {
                                 id="phone"
                                 placeholder="Enter phone number"
                                 value={
-                                    currentStaffMember.additional_details
-                                        .phone || undefined
+                                    currentData.additional_details.phone ||
+                                    undefined
                                 }
                                 onChange={(e) =>
                                     handleChangeAdditionalDetails(e)
@@ -303,7 +313,9 @@ export default function EditStaff() {
                         </div>
 
                         <div className="mb-5.5 flex flex-col gap-5.5 sm:flex-row">
-                            <div className="w-full sm:w-1/2">
+                            <div
+                                className={`${props?.type === AcademicUserTypeEnum.STUDENT ? 'sm:w-full' : 'sm:w-1/2'}`}
+                            >
                                 <label className="mb-2.5 block text-black dark:text-white">
                                     Department
                                 </label>
@@ -313,14 +325,14 @@ export default function EditStaff() {
                                         name="department"
                                         id="department"
                                         value={
-                                            currentStaffMember
-                                                .additional_details.department
+                                            currentData.additional_details
+                                                .department
                                         }
                                         onChange={(e) => {
                                             handleChangeAdditionalDetails(e);
                                         }}
                                     >
-                                        <option value="not_specified">
+                                        <option value="">
                                             Select your department
                                         </option>
                                         {[
@@ -336,16 +348,21 @@ export default function EditStaff() {
                                             },
                                             {
                                                 id: 3,
+                                                k: 'computer_engineering',
+                                                v: 'Computer Engineering',
+                                            },
+                                            {
+                                                id: 4,
                                                 k: 'electronics',
                                                 v: 'Electronics',
                                             },
                                             {
-                                                id: 4,
+                                                id: 5,
                                                 k: 'software',
                                                 v: 'Software',
                                             },
                                             {
-                                                id: 5,
+                                                id: 6,
                                                 k: 'telecom',
                                                 v: 'Telecom',
                                             },
@@ -381,94 +398,98 @@ export default function EditStaff() {
                                     </span>
                                 </div>
                             </div>
-                            <div className="w-full sm:w-1/2">
-                                <label className="mb-2.5 block text-black dark:text-white">
-                                    Designation
-                                </label>
-                                <div className="relative z-20 bg-transparent dark:bg-meta-4">
-                                    <select
-                                        className="relative z-20 w-full appearance-none rounded border border-stroke bg-gray px-4.5 py-3 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-meta-4 dark:focus:border-primary"
-                                        name="designation"
-                                        id="designation"
-                                        value={
-                                            currentStaffMember
-                                                .additional_details.designation
-                                        }
-                                        onChange={(e) => {
-                                            handleChangeAdditionalDetails(e);
-                                        }}
-                                    >
-                                        <option value="not_specified">
-                                            Select your designation
-                                        </option>
-                                        {[
-                                            {
-                                                id: 1,
-                                                k: 'chairman',
-                                                v: 'Chairman',
-                                            },
-                                            {
-                                                id: 2,
-                                                k: 'professor',
-                                                v: 'Professor',
-                                            },
-                                            {
-                                                id: 3,
-                                                k: 'associate_professor',
-                                                v: 'Associate Professor',
-                                            },
-                                            {
-                                                id: 4,
-                                                k: 'assistant_professor',
-                                                v: 'Assistant Professor',
-                                            },
-                                            {
-                                                id: 5,
-                                                k: 'lecturer',
-                                                v: 'Lecturer',
-                                            },
-                                            {
-                                                id: 6,
-                                                k: 'junior_lecturer',
-                                                v: 'Junior Lecturer',
-                                            },
-                                            {
-                                                id: 7,
-                                                k: 'visiting',
-                                                v: 'Visiting',
-                                            },
-                                        ].map((designation) => {
-                                            return (
-                                                <option
-                                                    key={designation.id}
-                                                    value={designation.k}
-                                                >
-                                                    {designation.v}
-                                                </option>
-                                            );
-                                        })}
-                                    </select>
-                                    <span className="absolute right-4 top-1/2 z-30 -translate-y-1/2">
-                                        <svg
-                                            className="fill-current"
-                                            width="24"
-                                            height="24"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            xmlns="http://www.w3.org/2000/svg"
+                            {props?.type !== AcademicUserTypeEnum.STUDENT && (
+                                <div className="sm:w-1/2">
+                                    <label className="mb-2.5 block text-black dark:text-white">
+                                        Designation
+                                    </label>
+                                    <div className="relative z-20 bg-transparent dark:bg-meta-4">
+                                        <select
+                                            className="relative z-20 w-full appearance-none rounded border border-stroke bg-gray px-4.5 py-3 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-meta-4 dark:focus:border-primary"
+                                            name="designation"
+                                            id="designation"
+                                            value={
+                                                currentData.additional_details
+                                                    .designation
+                                            }
+                                            onChange={(e) => {
+                                                handleChangeAdditionalDetails(
+                                                    e,
+                                                );
+                                            }}
                                         >
-                                            <g opacity="0.8">
-                                                <path
-                                                    fillRule="evenodd"
-                                                    clipRule="evenodd"
-                                                    d="M5.29289 8.29289C5.68342 7.90237 6.31658 7.90237 6.70711 8.29289L12 13.5858L17.2929 8.29289C17.6834 7.90237 18.3166 7.90237 18.7071 8.29289C19.0976 8.68342 19.0976 9.31658 18.7071 9.70711L12.7071 15.7071C12.3166 16.0976 11.6834 16.0976 11.2929 15.7071L5.29289 9.70711C4.90237 9.31658 4.90237 8.68342 5.29289 8.29289Z"
-                                                    fill=""
-                                                ></path>
-                                            </g>
-                                        </svg>
-                                    </span>
+                                            <option value="">
+                                                Select your designation
+                                            </option>
+                                            {[
+                                                {
+                                                    id: 1,
+                                                    k: 'chairman',
+                                                    v: 'Chairman',
+                                                },
+                                                {
+                                                    id: 2,
+                                                    k: 'professor',
+                                                    v: 'Professor',
+                                                },
+                                                {
+                                                    id: 3,
+                                                    k: 'associate_professor',
+                                                    v: 'Associate Professor',
+                                                },
+                                                {
+                                                    id: 4,
+                                                    k: 'assistant_professor',
+                                                    v: 'Assistant Professor',
+                                                },
+                                                {
+                                                    id: 5,
+                                                    k: 'lecturer',
+                                                    v: 'Lecturer',
+                                                },
+                                                {
+                                                    id: 6,
+                                                    k: 'junior_lecturer',
+                                                    v: 'Junior Lecturer',
+                                                },
+                                                {
+                                                    id: 7,
+                                                    k: 'visiting',
+                                                    v: 'Visiting',
+                                                },
+                                            ].map((designation) => {
+                                                return (
+                                                    <option
+                                                        key={designation.id}
+                                                        value={designation.k}
+                                                    >
+                                                        {designation.v}
+                                                    </option>
+                                                );
+                                            })}
+                                        </select>
+                                        <span className="absolute right-4 top-1/2 z-30 -translate-y-1/2">
+                                            <svg
+                                                className="fill-current"
+                                                width="24"
+                                                height="24"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                            >
+                                                <g opacity="0.8">
+                                                    <path
+                                                        fillRule="evenodd"
+                                                        clipRule="evenodd"
+                                                        d="M5.29289 8.29289C5.68342 7.90237 6.31658 7.90237 6.70711 8.29289L12 13.5858L17.2929 8.29289C17.6834 7.90237 18.3166 7.90237 18.7071 8.29289C19.0976 8.68342 19.0976 9.31658 18.7071 9.70711L12.7071 15.7071C12.3166 16.0976 11.6834 16.0976 11.2929 15.7071L5.29289 9.70711C4.90237 9.31658 4.90237 8.68342 5.29289 8.29289Z"
+                                                        fill=""
+                                                    ></path>
+                                                </g>
+                                            </svg>
+                                        </span>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </div>
 
                         <div className="mb-5.5 flex flex-col gap-5.5 sm:flex-row">
@@ -487,7 +508,7 @@ export default function EditStaff() {
                                         id="created_at_in_utc"
                                         readOnly
                                         value={TimestampConverter(
-                                            currentStaffMember.created_at_in_utc,
+                                            currentData.created_at_in_utc,
                                         )}
                                     />
                                 </div>
@@ -509,7 +530,7 @@ export default function EditStaff() {
                                         id="updated_at_in_utc"
                                         readOnly
                                         value={TimestampConverter(
-                                            currentStaffMember?.updated_at_in_utc,
+                                            currentData?.updated_at_in_utc,
                                         )}
                                     />
                                 </div>

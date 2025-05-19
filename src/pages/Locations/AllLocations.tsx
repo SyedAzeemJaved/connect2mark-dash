@@ -2,13 +2,15 @@ import { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { AuthContext } from '@context';
-import { LocationProps, ApiResponse, UserContextProps } from '@types';
 
 import { fireToast } from '@hooks';
 import { Breadcrumb, Pagination } from '@components';
 
-import { FireToastEnum } from '@types';
 import { constants } from '@constants';
+
+import { FireToastEnum } from '@enums';
+
+import type { LocationProps, ApiResponse, UserContextProps } from '@types';
 
 export default function Locations() {
     const { user } = useContext(AuthContext) as UserContextProps;

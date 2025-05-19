@@ -11,6 +11,7 @@ export interface AdditionalDetail {
     readonly department:
         | 'biomedical'
         | 'computer_science'
+        | 'computer_engineering'
         | 'electronics'
         | 'software'
         | 'telecom'
@@ -32,7 +33,7 @@ export interface AdminProps extends BasicUser {
     readonly additional_details: null;
 }
 
-export interface StaffProps extends BasicUser {
+export interface AcademicUserProps extends BasicUser {
     readonly additional_details: AdditionalDetail;
 }
 
@@ -54,7 +55,6 @@ export interface ScheduleProps {
 
     readonly is_reoccurring: boolean;
 
-    readonly staff_member: StaffProps;
     readonly location: LocationProps;
 
     readonly date: string | null;
@@ -78,8 +78,6 @@ export interface ScheduleInstanceProps {
     readonly end_time_in_utc: string;
 
     readonly schedule: ScheduleProps;
-
-    readonly staff_member: StaffProps;
     readonly location: LocationProps;
 
     readonly date: string;

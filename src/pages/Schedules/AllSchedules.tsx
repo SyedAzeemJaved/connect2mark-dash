@@ -2,12 +2,6 @@ import { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { AuthContext } from '@context';
-import {
-    ScheduleProps,
-    ApiResponse,
-    FireToastEnum,
-    UserContextProps,
-} from '@types';
 
 import { fireToast } from '@hooks';
 import { Breadcrumb, Pagination } from '@components';
@@ -16,10 +10,14 @@ import { constants } from '@constants';
 
 import { convertUTCTimeToLocalTime, TimestampConverter } from '@utils';
 
+import { FireToastEnum } from '@enums';
+
+import type { ScheduleProps, ApiResponse, UserContextProps } from '@types';
+
 export default function AllSchedules() {
     const { user } = useContext(AuthContext) as UserContextProps;
 
-    const [AllSchedules, setAllSchedules] = useState<ScheduleProps[]>([]);
+    const [allSchedules, setAllSchedules] = useState<ScheduleProps[]>([]);
     const [pageNumber, setPageNumber] = useState(1);
     const [apiResponse, setApiResponse] = useState<ApiResponse>({
         total: 0,
@@ -37,6 +35,7 @@ export default function AllSchedules() {
 
     const handleDeleteClick = async (id: number) => {
         let r = confirm('Are you sure you want to delete this schedule?');
+
         if (r === true) {
             try {
                 const res = await fetch(`${constants.SCHEDULES}/${id}`, {
@@ -88,7 +87,7 @@ export default function AllSchedules() {
 
             const response = await res.json();
 
-            if (res.status !== 200)
+            if (!res.ok)
                 throw new Error(
                     typeof response?.detail === 'string'
                         ? response.detail
@@ -103,25 +102,6 @@ export default function AllSchedules() {
                         start_time_in_utc: schedule.start_time_in_utc,
                         end_time_in_utc: schedule.end_time_in_utc,
                         is_reoccurring: schedule.is_reoccurring,
-                        staff_member: {
-                            id: schedule.staff_member.id,
-                            full_name: schedule.staff_member.full_name,
-                            email: schedule.staff_member.email,
-                            additional_details: {
-                                phone: schedule.staff_member.additional_details
-                                    .phone,
-                                department:
-                                    schedule.staff_member.additional_details
-                                        .department,
-                                designation:
-                                    schedule.staff_member.additional_details
-                                        .designation,
-                            },
-                            created_at_in_utc:
-                                schedule.staff_member.created_at_in_utc,
-                            updated_at_in_utc:
-                                schedule.staff_member.updated_at_in_utc,
-                        },
                         location: {
                             id: schedule.location.id,
                             title: schedule.location.title,
@@ -204,9 +184,6 @@ export default function AllSchedules() {
                                             Status
                                         </th>
                                         <th className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
-                                            Staff member
-                                        </th>
-                                        <th className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
                                             Location
                                         </th>
                                         <th className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
@@ -233,7 +210,7 @@ export default function AllSchedules() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {AllSchedules.map((schedule) => {
+                                    {allSchedules.map((schedule) => {
                                         return (
                                             <tr key={schedule.id}>
                                                 <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
@@ -247,22 +224,6 @@ export default function AllSchedules() {
                                                             ? 'Reoccurring'
                                                             : 'Non-reoccurring'}
                                                     </p>
-                                                </td>
-                                                <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-                                                    <p className="text-black dark:text-white">
-                                                        {
-                                                            schedule
-                                                                .staff_member
-                                                                .full_name
-                                                        }
-                                                    </p>
-                                                    <span className="text-sm">
-                                                        {
-                                                            schedule
-                                                                .staff_member
-                                                                .email
-                                                        }
-                                                    </span>
                                                 </td>
                                                 <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                                                     <p className="text-black dark:text-white">
@@ -293,7 +254,7 @@ export default function AllSchedules() {
                                                 </td>
                                                 <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                                                     <p className="text-black dark:text-white">
-                                                        {schedule.date}
+                                                        {schedule.date ?? 'NA'}
                                                     </p>
                                                 </td>
                                                 <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
@@ -312,7 +273,7 @@ export default function AllSchedules() {
                                                 </td>
                                                 <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                                                     <div className="flex items-center space-x-3.5">
-                                                        <button
+                                                        {/* <button
                                                             className="hover:text-primary"
                                                             onClick={() =>
                                                                 handleEditClick(
@@ -337,7 +298,7 @@ export default function AllSchedules() {
                                                                     fill=""
                                                                 />
                                                             </svg>
-                                                        </button>
+                                                        </button> */}
                                                         <button
                                                             className="hover:text-primary"
                                                             onClick={() =>

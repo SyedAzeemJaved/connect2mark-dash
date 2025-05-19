@@ -3,13 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import { AuthContext } from '@context';
 
-import {
-    StaffProps,
-    ApiResponse,
-    UserContextProps,
-    FireToastEnum,
-} from '@types';
-
 import { fireToast } from '@hooks';
 import { Breadcrumb, Pagination } from '@components';
 
@@ -17,10 +10,15 @@ import { constants } from '@constants';
 
 import { TimestampConverter } from '@utils';
 
-export default function AllStaff() {
+import { FireToastEnum, AcademicUserTypeEnum } from '@enums';
+
+import type { AcademicUserProps, ApiResponse, UserContextProps } from '@types';
+import type { ListingPageProps } from './types';
+
+export default function AllAcademicUsers(props: ListingPageProps) {
     const { user } = useContext(AuthContext) as UserContextProps;
 
-    const [staff, setStaff] = useState<StaffProps[]>([]);
+    const [academicUsers, setAcademicUsers] = useState<AcademicUserProps[]>([]);
     const [pageNumber, setPageNumber] = useState(1);
     const [apiResponse, setApiResponse] = useState<ApiResponse>({
         total: 0,
@@ -33,15 +31,17 @@ export default function AllStaff() {
     const navigate = useNavigate();
 
     const handleEditClick = (id: number) => {
-        navigate(`/staff/${id}`);
+        navigate(
+            `/${props?.type === AcademicUserTypeEnum.STUDENT ? 'students' : 'teachers'}/${id}`,
+        );
     };
 
     const handleStaffSchedules = (id: number) => {
-        navigate(`/schedules/staff/${id}`);
+        navigate(`/schedules/academic/${id}`);
     };
 
     const handleStaffTodayScheduleInstances = (id: number) => {
-        navigate(`/classes/staff/today/${id}`);
+        navigate(`/classes/academic/today/${id}`);
     };
 
     const handleChangePassword = (id: number) => {
@@ -49,7 +49,8 @@ export default function AllStaff() {
     };
 
     const handleDeleteClick = async (id: number) => {
-        let r = confirm('Are you sure you want to delete this staff member?');
+        let r = confirm('Are you sure you want to delete this user?');
+
         if (r === true) {
             try {
                 const res = await fetch(`${constants.USERS}/${id}`, {
@@ -60,18 +61,19 @@ export default function AllStaff() {
                     },
                 });
 
-                const response = await res.json();
+                if (!res.ok) {
+                    const response = await res.json();
 
-                if (res.status !== 200)
                     throw new Error(
                         typeof response?.detail === 'string'
                             ? response.detail
                             : 'Something went wrong',
                     );
+                }
 
                 fireToast(
                     'Success',
-                    'Staff member deleted successfully',
+                    'User deleted successfully',
                     FireToastEnum.SUCCESS,
                 );
             } catch (err: any) {
@@ -81,14 +83,16 @@ export default function AllStaff() {
                     FireToastEnum.DANGER,
                 );
             } finally {
-                fetchStaffMembers();
+                fetchAcademicUsersMembers(
+                    props?.type ?? AcademicUserTypeEnum.STUDENT,
+                );
             }
         }
     };
 
-    const fetchStaffMembers = async () => {
+    const fetchAcademicUsersMembers = async (type: AcademicUserTypeEnum) => {
         try {
-            let url = `${constants.USERS}/staff?page=${pageNumber}&size=${constants.RESULTS_PER_PAGE}`;
+            let url = `${constants.USERS}/academic?only_students=${type === AcademicUserTypeEnum.STUDENT ? 'yes' : 'no'}&page=${pageNumber}&size=${constants.RESULTS_PER_PAGE}`;
 
             const res = await fetch(url, {
                 method: 'GET',
@@ -107,18 +111,18 @@ export default function AllStaff() {
                         : 'Something went wrong',
                 );
 
-            const staffArr: StaffProps[] = response.items.map(
-                (staff: StaffProps) => {
+            const usersArr: AcademicUserProps[] = response.items.map(
+                (data: AcademicUserProps) => {
                     return {
-                        id: staff.id,
-                        full_name: staff.full_name,
-                        email: staff.email,
-                        created_at_in_utc: staff.created_at_in_utc,
-                        updated_at_in_utc: staff.updated_at_in_utc,
+                        id: data.id,
+                        full_name: data.full_name,
+                        email: data.email,
+                        created_at_in_utc: data.created_at_in_utc,
+                        updated_at_in_utc: data.updated_at_in_utc,
                         additional_details: {
-                            phone: staff.additional_details.phone,
-                            department: staff.additional_details.department,
-                            designation: staff.additional_details.designation,
+                            phone: data.additional_details.phone,
+                            department: data.additional_details.department,
+                            designation: data.additional_details.designation,
                         },
                     };
                 },
@@ -132,7 +136,7 @@ export default function AllStaff() {
                 items: response?.items,
             });
 
-            setStaff(staffArr);
+            setAcademicUsers(usersArr);
         } catch (err: any) {
             fireToast(
                 'There seems to be a problem',
@@ -143,18 +147,24 @@ export default function AllStaff() {
     };
 
     useEffect(() => {
-        fetchStaffMembers();
+        fetchAcademicUsersMembers(props?.type ?? AcademicUserTypeEnum.STUDENT);
 
         return () => {};
-    }, [pageNumber]);
+    }, [props?.type, pageNumber]);
 
     return (
         <>
-            <Breadcrumb pageName="Staff Members" />
+            <Breadcrumb
+                pageName={
+                    props?.type === AcademicUserTypeEnum.STUDENT
+                        ? 'Students'
+                        : 'Teachers'
+                }
+            />
             <div className="flex flex-col gap-6">
                 <div className="flex flex-row justify-end align-bottom">
                     <Link
-                        to="/staff/add"
+                        to={`/${props?.type === AcademicUserTypeEnum.STUDENT ? 'students' : 'teachers'}/add`}
                         className="inline-flex items-center justify-center gap-2.5 bg-primary px-10 py-4 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
                     >
                         <span>
@@ -198,20 +208,20 @@ export default function AllStaff() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {staff.map((staff) => {
+                                    {academicUsers.map((academicUser) => {
                                         return (
-                                            <tr key={staff.id}>
+                                            <tr key={academicUser.id}>
                                                 <td className="border-b border-[#eee] px-4 py-5 pl-9 dark:border-strokedark xl:pl-11">
                                                     <h5 className="font-medium text-black dark:text-white">
-                                                        {staff.full_name}
+                                                        {academicUser.full_name}
                                                     </h5>
                                                     <p className="text-sm">
-                                                        {staff.email}
+                                                        {academicUser.email}
                                                     </p>
                                                 </td>
                                                 <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                                                     <p className="text-black dark:text-white">
-                                                        {staff
+                                                        {academicUser
                                                             .additional_details
                                                             ?.phone ??
                                                             'Not specified'}
@@ -220,14 +230,14 @@ export default function AllStaff() {
                                                 <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                                                     <p className="text-black dark:text-white">
                                                         {TimestampConverter(
-                                                            staff.created_at_in_utc,
+                                                            academicUser.created_at_in_utc,
                                                         )}
                                                     </p>
                                                 </td>
                                                 <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                                                     <p className="text-black dark:text-white">
                                                         {TimestampConverter(
-                                                            staff?.updated_at_in_utc,
+                                                            academicUser?.updated_at_in_utc,
                                                         )}
                                                     </p>
                                                 </td>
@@ -237,7 +247,7 @@ export default function AllStaff() {
                                                             className="hover:text-primary"
                                                             onClick={() =>
                                                                 handleEditClick(
-                                                                    staff.id,
+                                                                    academicUser.id,
                                                                 )
                                                             }
                                                         >
@@ -263,7 +273,7 @@ export default function AllStaff() {
                                                             className="hover:text-primary"
                                                             onClick={() =>
                                                                 handleStaffSchedules(
-                                                                    staff.id,
+                                                                    academicUser.id,
                                                                 )
                                                             }
                                                         >
@@ -286,7 +296,7 @@ export default function AllStaff() {
                                                             className="hover:text-primary"
                                                             onClick={() =>
                                                                 handleStaffTodayScheduleInstances(
-                                                                    staff.id,
+                                                                    academicUser.id,
                                                                 )
                                                             }
                                                         >
@@ -309,7 +319,7 @@ export default function AllStaff() {
                                                             className="hover:text-primary"
                                                             onClick={() =>
                                                                 handleChangePassword(
-                                                                    staff.id,
+                                                                    academicUser.id,
                                                                 )
                                                             }
                                                         >
@@ -332,7 +342,7 @@ export default function AllStaff() {
                                                             className="hover:text-primary"
                                                             onClick={() =>
                                                                 handleDeleteClick(
-                                                                    staff?.id,
+                                                                    academicUser?.id,
                                                                 )
                                                             }
                                                         >

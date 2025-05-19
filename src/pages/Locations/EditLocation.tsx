@@ -6,8 +6,11 @@ import { AuthContext } from '@context';
 import { fireToast } from '@hooks';
 import { Breadcrumb } from '@components';
 
-import { LocationProps, FireToastEnum, UserContextProps } from '@types';
 import { constants } from '@constants';
+
+import { FireToastEnum } from '@enums';
+
+import type { LocationProps, UserContextProps } from '@types';
 
 export default function EditLocation() {
     const { id } = useParams();

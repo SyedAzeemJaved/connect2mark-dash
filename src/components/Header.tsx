@@ -83,7 +83,7 @@ export const Header = (props: {
                         </button>
 
                         <p className="w-full bg-transparent pl-9 pr-4 focus:outline-none">
-                            Developed by Team Connect2Mark
+                            Developed by Team SafeCheck
                         </p>
                     </div>
                 </div>

@@ -1,5 +1,6 @@
 import toast from 'react-hot-toast';
-import { FireToastEnum } from '@types';
+
+import { FireToastEnum } from '@enums';
 
 const createToast = (title: string, msg: string, type: FireToastEnum) => {
     toast.custom((t) => (

@@ -1,10 +1,12 @@
 import { ReactNode, useState, useEffect, useCallback } from 'react';
 
 import { AuthContext } from './AuthContext';
-import { AdminProps, UserContextProps, FireToastEnum } from '@types';
 
 import { fireToast } from '@hooks';
 import { constants } from '@constants';
+
+import { FireToastEnum } from '@enums';
+import type { AdminProps, UserContextProps } from '@types';
 
 const blankUser: AdminProps = {
     id: 0,

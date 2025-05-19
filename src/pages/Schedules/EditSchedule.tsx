@@ -2,12 +2,6 @@ import React, { useState, useContext, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { AuthContext } from '@context';
-import {
-    StaffProps,
-    LocationProps,
-    FireToastEnum,
-    UserContextProps,
-} from '@types';
 
 import { fireToast } from '@hooks';
 import { Breadcrumb } from '@components';
@@ -15,6 +9,10 @@ import { Breadcrumb } from '@components';
 import { constants } from '@constants';
 
 import { convertTo24HourUTC, convertToUTCDate } from '@utils';
+
+import { FireToastEnum } from '@enums';
+
+import type { StaffProps, LocationProps, UserContextProps } from '@types';
 
 type EditScheduleProps = {
     id: number;

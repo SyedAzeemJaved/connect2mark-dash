@@ -2,12 +2,6 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { AuthContext } from '@context';
-import {
-    ScheduleProps,
-    ApiResponse,
-    FireToastEnum,
-    UserContextProps,
-} from '@types';
 
 import { fireToast } from '@hooks';
 import { Breadcrumb, Pagination } from '@components';
@@ -20,6 +14,10 @@ import {
     TimestampConverter,
 } from '@utils';
 
+import { FireToastEnum } from '@enums';
+
+import type { ScheduleProps, ApiResponse, UserContextProps } from '@types';
+
 type FilterSelectedProps = {
     filter: 'date' | 'day' | 'today';
     date: string | null;
@@ -31,6 +29,7 @@ type FilterSelectedProps = {
         | 'friday'
         | 'saturday'
         | 'sunday'
+        | undefined
         | null;
 };
 
@@ -106,7 +105,7 @@ export default function FilterSchedules() {
         setAllSchedules([]);
         setSelectedFilter({
             ...selectedFilter,
-            filter: e.currentTarget.name,
+            filter: e.currentTarget.name as any,
         });
     };
 
@@ -116,6 +115,7 @@ export default function FilterSchedules() {
 
     const handleDeleteClick = async (id: number) => {
         let r = confirm('Are you sure you want to delete this schedule?');
+
         if (r === true) {
             try {
                 const res = await fetch(`${constants.SCHEDULES}/${id}`, {
@@ -128,7 +128,7 @@ export default function FilterSchedules() {
 
                 const response = await res.json();
 
-                if (res.status !== 200)
+                if (!res.ok)
                     throw new Error(
                         typeof response?.detail === 'string'
                             ? response.detail
@@ -201,7 +201,7 @@ export default function FilterSchedules() {
 
             const response = await res.json();
 
-            if (res.status !== 200)
+            if (!res.ok)
                 throw new Error(
                     typeof response?.detail === 'string'
                         ? response.detail
@@ -216,25 +216,6 @@ export default function FilterSchedules() {
                         start_time_in_utc: schedule.start_time_in_utc,
                         end_time_in_utc: schedule.end_time_in_utc,
                         is_reoccurring: schedule.is_reoccurring,
-                        staff_member: {
-                            id: schedule.staff_member.id,
-                            full_name: schedule.staff_member.full_name,
-                            email: schedule.staff_member.email,
-                            additional_details: {
-                                phone: schedule.staff_member.additional_details
-                                    .phone,
-                                department:
-                                    schedule.staff_member.additional_details
-                                        .department,
-                                designation:
-                                    schedule.staff_member.additional_details
-                                        .designation,
-                            },
-                            created_at_in_utc:
-                                schedule.staff_member.created_at_in_utc,
-                            updated_at_in_utc:
-                                schedule.staff_member.updated_at_in_utc,
-                        },
                         location: {
                             id: schedule.location.id,
                             title: schedule.location.title,
@@ -502,9 +483,9 @@ export default function FilterSchedules() {
                                         <th className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
                                             Status
                                         </th>
-                                        <th className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
+                                        {/* <th className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
                                             Staff member
-                                        </th>
+                                        </th> */}
                                         <th className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
                                             Location
                                         </th>
@@ -547,7 +528,7 @@ export default function FilterSchedules() {
                                                             : 'Non-reoccurring'}
                                                     </p>
                                                 </td>
-                                                <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+                                                {/* <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                                                     <p className="text-black dark:text-white">
                                                         {
                                                             schedule
@@ -562,7 +543,7 @@ export default function FilterSchedules() {
                                                                 .email
                                                         }
                                                     </span>
-                                                </td>
+                                                </td> */}
                                                 <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                                                     <p className="text-black dark:text-white">
                                                         {

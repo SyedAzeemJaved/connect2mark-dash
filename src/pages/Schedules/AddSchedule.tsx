@@ -6,27 +6,29 @@ import { fireToast } from '@hooks';
 import { Breadcrumb } from '@components';
 
 import { constants } from '@constants';
-import {
-    StaffProps,
-    LocationProps,
-    FireToastEnum,
-    UserContextProps,
-} from '@types';
 
 import { convertTo24HourUTC, convertToUTCDate } from '@utils';
 
-type CreateScheduleProps = {
-    title: string;
+import { FireToastEnum } from '@enums';
 
-    start_time_in_utc: string;
-    end_time_in_utc: string;
+import type {
+    AcademicUserProps,
+    LocationProps,
+    UserContextProps,
+} from '@types';
+
+type CreateScheduleProps = {
+    title: string | undefined;
+
+    start_time_in_utc: string | undefined;
+    end_time_in_utc: string | undefined;
 
     is_reoccurring: boolean;
 
-    staff_member_id: number;
-    location_id: number;
+    location_id: number | undefined;
+    teacher_id: number | undefined;
 
-    date: string | null;
+    date: string | null | undefined;
     day:
         | 'monday'
         | 'tuesday'
@@ -35,23 +37,34 @@ type CreateScheduleProps = {
         | 'friday'
         | 'saturday'
         | 'sunday'
+        | undefined
         | null;
 };
 
 export default function AddSchedule() {
     const { user, setLoading } = useContext(AuthContext) as UserContextProps;
-    const [allStaff, setAllStaff] = useState<StaffProps[]>([]);
-    const [allLocations, setAllLocations] = useState<LocationProps[]>([]);
 
-    const [schedule, setSchedule] = useState<CreateScheduleProps>({
-        title: '',
-        start_time_in_utc: '',
-        end_time_in_utc: '',
-        is_reoccurring: true,
-        staff_member_id: 0,
-        location_id: 0,
-        date: null,
-        day: null,
+    const [data, setData] = useState<{
+        locations: LocationProps[];
+        teachers: AcademicUserProps[];
+        students: AcademicUserProps[];
+        schedule: CreateScheduleProps;
+        selectedStudents: number[];
+    }>({
+        locations: [],
+        teachers: [],
+        students: [],
+        schedule: {
+            title: undefined,
+            start_time_in_utc: undefined,
+            end_time_in_utc: undefined,
+            is_reoccurring: true,
+            location_id: undefined,
+            teacher_id: undefined,
+            date: undefined,
+            day: undefined,
+        },
+        selectedStudents: [],
     });
 
     const handleStartOrEndTime = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,10 +76,13 @@ export default function AddSchedule() {
         }
 
         if (timeRegex.test(inputValue)) {
-            setSchedule({
-                ...schedule,
-                [e.target.name]: convertTo24HourUTC(inputValue),
-            });
+            setData((prev) => ({
+                ...prev,
+                schedule: {
+                    ...prev.schedule,
+                    [e.target.name]: convertTo24HourUTC(inputValue),
+                },
+            }));
         } else {
             e.target.value = '';
             fireToast(
@@ -119,10 +135,13 @@ export default function AddSchedule() {
         }
 
         // All checks were true
-        setSchedule({
-            ...schedule,
-            [e.target.name]: convertToUTCDate(inputDate),
-        });
+        setData((prev) => ({
+            ...prev,
+            schedule: {
+                ...prev.schedule,
+                [e.target.value]: convertToUTCDate(inputDate),
+            },
+        }));
     };
 
     const handleSubmit = async (e: React.MouseEvent) => {
@@ -130,21 +149,22 @@ export default function AddSchedule() {
             e.preventDefault();
 
             if (
-                !schedule.title ||
-                !schedule.start_time_in_utc ||
-                !schedule.end_time_in_utc ||
-                !schedule.staff_member_id ||
-                !schedule.location_id
+                !data?.schedule?.title ||
+                !data?.schedule?.start_time_in_utc ||
+                !data?.schedule?.end_time_in_utc ||
+                !data?.schedule?.location_id ||
+                !data?.schedule?.teacher_id
             ) {
+                console.log(data?.schedule);
                 throw new Error('Please fill all input fields');
             }
 
-            if (schedule.is_reoccurring) {
-                if (!schedule.day) {
+            if (data?.schedule?.is_reoccurring) {
+                if (!data?.schedule?.day) {
                     throw new Error('Reoccurring schedules must have a day');
                 }
             } else {
-                if (!schedule.date) {
+                if (!data?.schedule?.date) {
                     throw new Error(
                         'Non-reoccurring schedules must have a date',
                     );
@@ -153,23 +173,25 @@ export default function AddSchedule() {
 
             setLoading(true);
 
-            let url = schedule.is_reoccurring
+            let url = data?.schedule?.is_reoccurring
                 ? '/reoccurring'
                 : '/non-reoccurring';
+
             let body: CreateScheduleProps = {
-                title: schedule.title,
-                start_time_in_utc: schedule.start_time_in_utc,
-                end_time_in_utc: schedule.end_time_in_utc,
-                is_reoccurring: schedule.is_reoccurring,
-                staff_member_id: schedule.staff_member_id,
-                location_id: schedule.location_id,
+                title: data?.schedule.title,
+                start_time_in_utc: data?.schedule?.start_time_in_utc,
+                end_time_in_utc: data?.schedule?.end_time_in_utc,
+                is_reoccurring: data?.schedule?.is_reoccurring,
+                location_id: data?.schedule?.location_id,
+                teacher_id: data?.schedule?.teacher_id,
                 day: null,
                 date: null,
             };
-            if (schedule.is_reoccurring) {
-                body.day = schedule.day;
+
+            if (data?.schedule?.is_reoccurring) {
+                body.day = data?.schedule?.day;
             } else {
-                body.date = schedule.date;
+                body.date = data?.schedule?.date;
             }
 
             const res = await fetch(constants.SCHEDULES + url, {
@@ -184,7 +206,7 @@ export default function AddSchedule() {
 
             const response = await res.json();
 
-            if (res.status !== 200)
+            if (!res.ok)
                 throw new Error(
                     typeof response?.detail === 'string'
                         ? response.detail
@@ -207,43 +229,51 @@ export default function AddSchedule() {
         }
     };
 
-    const fetchAllStaff = async () => {
+    const fetchAllTeachers = async () => {
         try {
-            const res = await fetch(constants.USERS + '/staff', {
-                method: 'GET',
-                headers: {
-                    accept: 'application/json',
-                    Authorization: `Bearer ${user.accessToken}`,
+            const res = await fetch(
+                constants.USERS + '/academic?only_students=no',
+                {
+                    method: 'GET',
+                    headers: {
+                        accept: 'application/json',
+                        Authorization: `Bearer ${user.accessToken}`,
+                    },
                 },
-            });
+            );
 
             const response = await res.json();
 
-            if (res.status !== 200)
+            if (!res.ok)
                 throw new Error(
                     typeof response?.detail === 'string'
                         ? response.detail
                         : 'Something went wrong',
                 );
 
-            const staffArr: StaffProps[] = response.items.map(
-                (staff: StaffProps) => {
+            const academicUsers: AcademicUserProps[] = response.items.map(
+                (academicUser: AcademicUserProps) => {
                     return {
-                        id: staff.id,
-                        full_name: staff.full_name,
-                        email: staff.email,
+                        id: academicUser.id,
+                        full_name: academicUser.full_name,
+                        email: academicUser.email,
                         additional_details: {
-                            phone: staff.additional_details.phone,
-                            department: staff.additional_details.department,
-                            designation: staff.additional_details.designation,
+                            phone: academicUser.additional_details.phone,
+                            department:
+                                academicUser.additional_details.department,
+                            designation:
+                                academicUser.additional_details.designation,
                         },
-                        created_at_in_utc: staff.created_at_in_utc,
-                        updated_at_in_utc: staff.updated_at_in_utc,
+                        created_at_in_utc: academicUser.created_at_in_utc,
+                        updated_at_in_utc: academicUser.updated_at_in_utc,
                     };
                 },
             );
 
-            setAllStaff(staffArr);
+            setData((prev) => ({
+                ...prev,
+                teachers: academicUsers,
+            }));
         } catch (err: any) {
             fireToast(
                 'There seems to be a problem',
@@ -265,7 +295,7 @@ export default function AddSchedule() {
 
             const response = await res.json();
 
-            if (res.status !== 200)
+            if (!res.ok)
                 throw new Error(
                     typeof response?.detail === 'string'
                         ? response.detail
@@ -285,7 +315,10 @@ export default function AddSchedule() {
                 },
             );
 
-            setAllLocations(locationArr);
+            setData((prev) => ({
+                ...prev,
+                locations: locationArr,
+            }));
         } catch (err: any) {
             fireToast(
                 'There seems to be a problem',
@@ -296,7 +329,7 @@ export default function AddSchedule() {
     };
 
     useEffect(() => {
-        fetchAllStaff();
+        fetchAllTeachers();
         fetchAllLocations();
 
         return () => {};
@@ -308,7 +341,7 @@ export default function AddSchedule() {
             <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
                 <div className="border-b border-stroke px-6.5 py-4 dark:border-strokedark">
                     <h3 className="font-medium text-black dark:text-white">
-                        Add a new schedule to Connect2Mark
+                        Add a new schedule to SafeCheck
                     </h3>
                 </div>
                 <form action="#">
@@ -324,10 +357,13 @@ export default function AddSchedule() {
                                 name="title"
                                 id="title"
                                 onChange={(e) => {
-                                    setSchedule({
-                                        ...schedule,
-                                        [e.target.name]: e.target.value,
-                                    });
+                                    setData((prev) => ({
+                                        ...prev,
+                                        schedule: {
+                                            ...prev.schedule,
+                                            [e.target.name]: e.target.value,
+                                        },
+                                    }));
                                 }}
                             />
                         </div>
@@ -375,27 +411,34 @@ export default function AddSchedule() {
                                     <select
                                         className="w-full appearance-none rounded border border-stroke bg-transparent px-5 py-3 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                                         onChange={(e) => {
-                                            setSchedule((prev) => ({
+                                            setData((prev) => ({
                                                 ...prev,
-                                                staff_member_id: parseInt(
-                                                    e.target.value,
-                                                ),
+                                                schedule: {
+                                                    ...prev.schedule,
+                                                    teacher_id: parseInt(
+                                                        e.target.value,
+                                                    ),
+                                                },
                                             }));
                                         }}
                                     >
                                         <option value="0">
                                             Select staff member
                                         </option>
-                                        {allStaff.map((staff: StaffProps) => {
-                                            return (
-                                                <option
-                                                    key={staff.id}
-                                                    value={staff.id}
-                                                >
-                                                    {staff.full_name}
-                                                </option>
-                                            );
-                                        })}
+                                        {data?.teachers?.map(
+                                            (
+                                                academicUser: AcademicUserProps,
+                                            ) => {
+                                                return (
+                                                    <option
+                                                        key={academicUser.id}
+                                                        value={academicUser.id}
+                                                    >
+                                                        {academicUser.full_name}
+                                                    </option>
+                                                );
+                                            },
+                                        )}
                                     </select>
                                     <span className="absolute right-4 top-1/2 z-30 -translate-y-1/2">
                                         <svg
@@ -427,18 +470,21 @@ export default function AddSchedule() {
                                     <select
                                         className="w-full appearance-none rounded border border-stroke bg-transparent px-5 py-3 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                                         onChange={(e) => {
-                                            setSchedule((prev) => ({
+                                            setData((prev) => ({
                                                 ...prev,
-                                                location_id: parseInt(
-                                                    e.target.value,
-                                                ),
+                                                schedule: {
+                                                    ...prev.schedule,
+                                                    location_id: parseInt(
+                                                        e.target.value,
+                                                    ),
+                                                },
                                             }));
                                         }}
                                     >
                                         <option value="0">
                                             Select location
                                         </option>
-                                        {allLocations.map(
+                                        {data?.locations?.map(
                                             (location: LocationProps) => {
                                                 return (
                                                     <option
@@ -485,14 +531,17 @@ export default function AddSchedule() {
                                 <button
                                     type="button"
                                     className={`custom-btn-group w-1/2 rounded-s-lg border border-b border-r-0 border-t px-5 py-3 font-medium ${
-                                        schedule.is_reoccurring &&
+                                        data?.schedule?.is_reoccurring &&
                                         'custom-btn-group-selected'
                                     }`}
                                     onClick={(e) =>
-                                        setSchedule((prev) => ({
+                                        setData((prev) => ({
                                             ...prev,
-                                            is_reoccurring: true,
-                                            date: null,
+                                            schedule: {
+                                                ...prev.schedule,
+                                                is_reoccurring: true,
+                                                date: null,
+                                            },
                                         }))
                                     }
                                 >
@@ -501,14 +550,17 @@ export default function AddSchedule() {
                                 <button
                                     type="button"
                                     className={`custom-btn-group w-1/2 rounded-e-lg border border-b border-l-0 border-t px-5 py-3 font-medium ${
-                                        !schedule.is_reoccurring &&
+                                        !data?.schedule?.is_reoccurring &&
                                         'custom-btn-group-selected'
                                     }`}
                                     onClick={(e) =>
-                                        setSchedule((prev) => ({
+                                        setData((prev) => ({
                                             ...prev,
-                                            is_reoccurring: false,
-                                            day: null,
+                                            schedule: {
+                                                ...prev.schedule,
+                                                is_reoccurring: false,
+                                                day: null,
+                                            },
                                         }))
                                     }
                                 >
@@ -518,7 +570,7 @@ export default function AddSchedule() {
                         </div>
 
                         <div
-                            className={`mb-4.5 ${!schedule.is_reoccurring && 'hidden'}`}
+                            className={`mb-4.5 ${!data?.schedule?.is_reoccurring && 'hidden'}`}
                         >
                             <label className="mb-2.5 block text-black dark:text-white">
                                 Day
@@ -531,13 +583,16 @@ export default function AddSchedule() {
                                 <button
                                     type="button"
                                     className={`custom-btn-group w-50 rounded-s-lg border border-b border-r-0 border-t px-5 py-3 font-medium ${
-                                        schedule.day === 'monday' &&
+                                        data?.schedule.day === 'monday' &&
                                         'custom-btn-group-selected'
                                     }`}
                                     onClick={(e) =>
-                                        setSchedule((prev) => ({
+                                        setData((prev) => ({
                                             ...prev,
-                                            day: 'monday',
+                                            schedule: {
+                                                ...prev.schedule,
+                                                day: 'monday',
+                                            },
                                         }))
                                     }
                                 >
@@ -546,13 +601,16 @@ export default function AddSchedule() {
                                 <button
                                     type="button"
                                     className={`custom-btn-group w-50 border border-b border-r-0 border-t px-5 py-3 font-medium ${
-                                        schedule.day === 'tuesday' &&
+                                        data?.schedule.day === 'tuesday' &&
                                         'custom-btn-group-selected'
                                     }`}
                                     onClick={(e) =>
-                                        setSchedule((prev) => ({
+                                        setData((prev) => ({
                                             ...prev,
-                                            day: 'tuesday',
+                                            schedule: {
+                                                ...prev.schedule,
+                                                day: 'tuesday',
+                                            },
                                         }))
                                     }
                                 >
@@ -561,13 +619,16 @@ export default function AddSchedule() {
                                 <button
                                     type="button"
                                     className={`custom-btn-group w-50 border border-b border-r-0 border-t px-5 py-3 font-medium ${
-                                        schedule.day === 'wednesday' &&
+                                        data?.schedule.day === 'wednesday' &&
                                         'custom-btn-group-selected'
                                     }`}
                                     onClick={(e) =>
-                                        setSchedule((prev) => ({
+                                        setData((prev) => ({
                                             ...prev,
-                                            day: 'wednesday',
+                                            schedule: {
+                                                ...prev.schedule,
+                                                day: 'wednesday',
+                                            },
                                         }))
                                     }
                                 >
@@ -576,13 +637,16 @@ export default function AddSchedule() {
                                 <button
                                     type="button"
                                     className={`custom-btn-group w-50 border border-b border-r-0 border-t px-5 py-3 font-medium ${
-                                        schedule.day === 'thursday' &&
+                                        data?.schedule.day === 'thursday' &&
                                         'custom-btn-group-selected'
                                     }`}
                                     onClick={(e) =>
-                                        setSchedule((prev) => ({
+                                        setData((prev) => ({
                                             ...prev,
-                                            day: 'thursday',
+                                            schedule: {
+                                                ...prev.schedule,
+                                                day: 'thursday',
+                                            },
                                         }))
                                     }
                                 >
@@ -591,13 +655,16 @@ export default function AddSchedule() {
                                 <button
                                     type="button"
                                     className={`custom-btn-group w-50 border border-b border-r-0 border-t px-5 py-3 font-medium ${
-                                        schedule.day === 'friday' &&
+                                        data?.schedule.day === 'friday' &&
                                         'custom-btn-group-selected'
                                     }`}
                                     onClick={(e) =>
-                                        setSchedule((prev) => ({
+                                        setData((prev) => ({
                                             ...prev,
-                                            day: 'friday',
+                                            schedule: {
+                                                ...prev.schedule,
+                                                day: 'friday',
+                                            },
                                         }))
                                     }
                                 >
@@ -606,13 +673,16 @@ export default function AddSchedule() {
                                 <button
                                     type="button"
                                     className={`custom-btn-group w-50 border border-b border-r-0 border-t px-5 py-3 font-medium ${
-                                        schedule.day === 'saturday' &&
+                                        data?.schedule.day === 'saturday' &&
                                         'custom-btn-group-selected'
                                     }`}
                                     onClick={(e) =>
-                                        setSchedule((prev) => ({
+                                        setData((prev) => ({
                                             ...prev,
-                                            day: 'saturday',
+                                            schedule: {
+                                                ...prev.schedule,
+                                                day: 'saturday',
+                                            },
                                         }))
                                     }
                                 >
@@ -621,13 +691,16 @@ export default function AddSchedule() {
                                 <button
                                     type="button"
                                     className={`custom-btn-group w-50 rounded-e-lg border border-b border-r-0 border-t px-5 py-3 font-medium ${
-                                        schedule.day === 'sunday' &&
+                                        data?.schedule.day === 'sunday' &&
                                         'custom-btn-group-selected'
                                     }`}
                                     onClick={(e) =>
-                                        setSchedule((prev) => ({
+                                        setData((prev) => ({
                                             ...prev,
-                                            day: 'sunday',
+                                            schedule: {
+                                                ...prev.schedule,
+                                                day: 'sunday',
+                                            },
                                         }))
                                     }
                                 >
@@ -637,7 +710,7 @@ export default function AddSchedule() {
                         </div>
 
                         <div
-                            className={`mb-4.5 ${schedule.is_reoccurring && 'hidden'}`}
+                            className={`mb-4.5 ${data?.schedule.is_reoccurring && 'hidden'}`}
                         >
                             <label className="mb-2.5 block text-black dark:text-white">
                                 Date

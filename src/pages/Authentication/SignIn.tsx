@@ -2,13 +2,16 @@ import { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 
 import { AuthContext } from '@context';
-import { UserContextProps, FireToastEnum } from '@types';
 
 import { fireToast } from '@hooks';
 import { constants } from '@constants';
 
 import LogoDark from '../../images/logo/logo-dark.svg';
 import Logo from '../../images/logo/logo.svg';
+
+import { FireToastEnum } from '@enums';
+
+import type { UserContextProps } from '@types';
 
 type User = {
     email: string | null;
@@ -103,7 +106,7 @@ const SignIn = () => {
                             </Link>
 
                             <p className="2xl:px-20">
-                                Connect2Mark - Admin Dashboard
+                                SafeCheck - Admin Dashboard
                             </p>
 
                             <span className="mt-15 inline-block">
@@ -237,7 +240,8 @@ const SignIn = () => {
                                 Start managing the application
                             </span>
                             <h2 className="mb-9 text-2xl font-bold text-black dark:text-white sm:text-title-xl2">
-                                Sign In to Connect2Mark Microblading
+                                Sign In to SafeCheck: Multi-layer Classroom
+                                Presence System
                             </h2>
 
                             <form>

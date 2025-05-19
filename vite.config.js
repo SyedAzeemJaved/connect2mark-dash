@@ -11,6 +11,7 @@ export default defineConfig({
             '@constants': path.resolve(__dirname, './src/constants'),
             '@context': path.resolve(__dirname, './src/context'),
             '@types': path.resolve(__dirname, './src/types'),
+            '@enums': path.resolve(__dirname, './src/enums'),
             '@utils': path.resolve(__dirname, './src/utils'),
             '@hooks': path.resolve(__dirname, './src/hooks'),
             '@layout': path.resolve(__dirname, './src/layout'),

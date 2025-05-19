@@ -2,17 +2,14 @@ import React, { useState, useContext, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { AuthContext } from '@context';
-import {
-    StaffProps,
-    LocationProps,
-    FireToastEnum,
-    UserContextProps,
-} from '@types';
 
 import { fireToast } from '@hooks';
 import { Breadcrumb } from '@components';
 
 import { constants } from '@constants';
+
+import { FireToastEnum } from '@enums';
+import type { StaffProps, LocationProps, UserContextProps } from '@types';
 
 type EditScheduleInstanceProps = {
     staff_member_id: number;

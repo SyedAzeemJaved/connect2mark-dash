@@ -1,15 +1,8 @@
 import { useState, useContext, useEffect, ChangeEvent } from 'react';
 
-import { Mapplic } from '../../components/Mapplic';
+// import { Mapplic } from '../../components/Mapplic';
 
 import { AuthContext } from '@context';
-
-import {
-    UserContextProps,
-    StaffProps,
-    AttendanceResultProps,
-    FireToastEnum,
-} from '@types';
 
 import { fireToast } from '@hooks';
 import { Card, Graph, Graph2 } from '@components';
@@ -18,15 +11,23 @@ import { constants } from '@constants';
 
 import { daysFromToday, formatDateToApiFormatString } from '@utils';
 
+import { FireToastEnum } from '@enums';
+
+import type {
+    UserContextProps,
+    AcademicUserProps,
+    AttendanceResultProps,
+} from '@types';
 interface DashboardOverviewProps {
-    staffMembersCount: string | number;
+    teachersCount: string | number;
+    studentsCount: string | number;
     locationsCount: string | number;
     schedulesCount: string | number;
     scheduleInstancesCount: string | number;
 }
 
 interface GraphQueryProps {
-    selectedStaffMember: StaffProps | null;
+    selectedStaffMember: AcademicUserProps | null;
     startDate: Date | null;
     fetchRange: 'week' | 'month';
 }
@@ -35,11 +36,13 @@ const Overview = () => {
     const { user } = useContext(AuthContext) as UserContextProps;
 
     const [dashboardData, setDashboardData] = useState<DashboardOverviewProps>({
-        staffMembersCount: 'Fetching',
+        teachersCount: 'Fetching',
+        studentsCount: 'Fetching',
         locationsCount: 'Fetching',
         schedulesCount: 'Fetching',
         scheduleInstancesCount: 'Fetching',
     });
+
     const [graphData, setGraphData] = useState<
         Record<string, AttendanceResultProps[]>
     >({});
@@ -50,7 +53,9 @@ const Overview = () => {
         fetchRange: 'week',
     });
 
-    const [allStaffMembers, setAllStaffMembers] = useState<StaffProps[]>([]);
+    const [allStaffMembers, setAllStaffMembers] = useState<AcademicUserProps[]>(
+        [],
+    );
 
     const fetchStats = async () => {
         try {
@@ -72,7 +77,8 @@ const Overview = () => {
                 );
 
             setDashboardData({
-                staffMembersCount: response.staff_count,
+                teachersCount: response.teachers_count,
+                studentsCount: response.students_count,
                 locationsCount: response.locations_count,
                 schedulesCount: response.schedules_count,
                 scheduleInstancesCount: response.schedule_instances_count,
@@ -86,30 +92,33 @@ const Overview = () => {
         }
     };
 
-    const fetchAllStaffMembers = async () => {
+    const fetchAllTeachers = async () => {
         try {
-            const res = await fetch(constants.STAFF, {
-                method: 'GET',
-                headers: {
-                    accept: 'application/json',
-                    Authorization: `Bearer ${user.accessToken}`,
+            const res = await fetch(
+                constants.USERS + '/academic?only_students=no',
+                {
+                    method: 'GET',
+                    headers: {
+                        accept: 'application/json',
+                        Authorization: `Bearer ${user.accessToken}`,
+                    },
                 },
-            });
+            );
 
             const response = await res.json();
 
-            if (res.status !== 200)
+            if (!res.ok)
                 throw new Error(
                     typeof response?.detail === 'string'
                         ? response.detail
                         : 'Something went wrong',
                 );
 
-            const staffArr: StaffProps[] = response.items.map(
-                (item: StaffProps) => item,
+            const teachersArr: AcademicUserProps[] = response.items.map(
+                (item: AcademicUserProps) => item,
             );
 
-            setAllStaffMembers(staffArr);
+            setAllStaffMembers(teachersArr);
         } catch (err: any) {
             fireToast(
                 'There seems to be a problem',
@@ -121,7 +130,7 @@ const Overview = () => {
 
     useEffect(() => {
         fetchStats();
-        fetchAllStaffMembers();
+        fetchAllTeachers();
 
         return () => {};
     }, []);
@@ -225,8 +234,12 @@ const Overview = () => {
         <>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
                 <Card
-                    title="Total Staff Members"
-                    description={dashboardData.staffMembersCount}
+                    title="Total Teachers"
+                    description={dashboardData.teachersCount}
+                />
+                <Card
+                    title="Total Students"
+                    description={dashboardData.studentsCount}
                 />
                 <Card
                     title="Total Locations"
@@ -242,7 +255,8 @@ const Overview = () => {
                 />
             </div>
 
-            <div className="mt-7.5 grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
+            {/* <div className="mt-7.5 grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5"> */}
+            <div className="mt-7.5 w-full space-y-6">
                 <Graph
                     fetchRange={graphQueryValues.fetchRange}
                     graphData={graphData}
@@ -254,13 +268,13 @@ const Overview = () => {
                     handleSetStaffMember={handleSetStaffMember}
                 />
 
-                <div className="col-span-12 rounded-sm border border-stroke bg-white p-7.5 shadow-default dark:border-strokedark dark:bg-boxdark xl:col-span-4">
+                {/* <div className="col-span-12 rounded-sm border border-stroke bg-white p-7.5 shadow-default dark:border-strokedark dark:bg-boxdark xl:col-span-4">
                     <section id="map-section" className="inner over">
                         <div>
                             <Mapplic />
                         </div>
                     </section>
-                </div>
+                </div> */}
             </div>
         </>
     );

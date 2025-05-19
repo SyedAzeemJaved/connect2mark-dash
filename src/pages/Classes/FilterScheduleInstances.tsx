@@ -2,12 +2,6 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { AuthContext } from '@context';
-import {
-    ApiResponse,
-    FireToastEnum,
-    UserContextProps,
-    ScheduleInstanceProps,
-} from '@types';
 
 import { fireToast } from '@hooks';
 import { Breadcrumb, Pagination } from '@components';
@@ -15,6 +9,14 @@ import { Breadcrumb, Pagination } from '@components';
 import { constants } from '@constants';
 
 import { convertUTCTimeToLocalTime, TimestampConverter } from '@utils';
+
+import { FireToastEnum } from '@enums';
+
+import type {
+    ApiResponse,
+    UserContextProps,
+    ScheduleInstanceProps,
+} from '@types';
 
 type FilterSelectedProps = {
     filter: 'date' | 'today';

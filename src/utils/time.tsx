@@ -8,7 +8,7 @@ export const daysFromToday = (days: number): Date => {
     return new Date(today.getTime() + days * MILLISECONDS_IN_A_DAY);
 };
 
-export function TimestampConverter(timestampValue: string | null) {
+export function TimestampConverter(timestampValue: string | undefined | null) {
     if (timestampValue && typeof (timestampValue === 'string')) {
         const date = new Date(timestampValue);
         const formattedTimeAgo = formatDistanceToNow(date);

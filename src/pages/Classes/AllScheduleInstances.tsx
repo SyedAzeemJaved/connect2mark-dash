@@ -2,12 +2,6 @@ import { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { AuthContext } from '@context';
-import {
-    ScheduleInstanceProps,
-    ApiResponse,
-    FireToastEnum,
-    UserContextProps,
-} from '@types';
 
 import { fireToast } from '@hooks';
 import { Breadcrumb, Pagination } from '@components';
@@ -15,6 +9,14 @@ import { Breadcrumb, Pagination } from '@components';
 import { constants } from '@constants';
 
 import { convertUTCTimeToLocalTime, TimestampConverter } from '@utils';
+
+import { FireToastEnum } from '@enums';
+
+import type {
+    ScheduleInstanceProps,
+    ApiResponse,
+    UserContextProps,
+} from '@types';
 
 export default function AllScheduleInstances() {
     const { user } = useContext(AuthContext) as UserContextProps;

@@ -2,12 +2,15 @@ import { useState, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { AuthContext } from '@context';
-import { FireToastEnum, UserContextProps } from '@types';
 
 import { fireToast } from '@hooks';
 import { Breadcrumb } from '@components';
 
 import { constants } from '../../constants';
+
+import { FireToastEnum } from '@enums';
+
+import type { UserContextProps } from '@types';
 
 type EditUserPassword = {
     password: string;

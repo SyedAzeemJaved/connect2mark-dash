@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { ApexOptions } from 'apexcharts';
 import ReactApexChart from 'react-apexcharts';
 
-import { AttendanceResultProps, StaffProps } from '@types';
+import { AttendanceResultProps, AcademicUserProps } from '@types';
 
 import {
     countTotalClassesForADate,
@@ -91,13 +91,13 @@ interface ChartTwoState {
 }
 
 export const Graph2 = ({
-    allStaffMembers,
+    allTeachers,
     graphData,
-    handleSetStaffMember,
+    handleSetTeacher,
 }: {
-    allStaffMembers: StaffProps[];
+    allTeachers: AcademicUserProps[];
     graphData: Record<string, AttendanceResultProps[]>;
-    handleSetStaffMember: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+    handleSetTeacher: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 }) => {
     const [state, setState] = useState<ChartTwoState>({
         series: [
@@ -153,9 +153,9 @@ export const Graph2 = ({
                             name="#"
                             id="#"
                             className="relative z-20 inline-flex appearance-none bg-transparent py-1 pl-3 pr-8 text-sm font-medium outline-none"
-                            onChange={handleSetStaffMember}
+                            onChange={handleSetTeacher}
                         >
-                            {allStaffMembers.map((item) => {
+                            {allTeachers.map((item) => {
                                 return (
                                     <option
                                         key={item.id}

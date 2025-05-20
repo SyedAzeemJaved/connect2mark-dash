@@ -9,10 +9,14 @@ import { Breadcrumb } from '@components';
 import { constants } from '@constants';
 
 import { FireToastEnum } from '@enums';
-import type { StaffProps, LocationProps, UserContextProps } from '@types';
+import type {
+    AcademicUserProps,
+    LocationProps,
+    UserContextProps,
+} from '@types';
 
 type EditScheduleInstanceProps = {
-    staff_member_id: number;
+    teacher_id: number;
     location_id: number;
 };
 
@@ -23,10 +27,10 @@ export default function EditScheduleInstance() {
 
     const [currentScheduleInstance, setCurrentScheduleInstance] =
         useState<EditScheduleInstanceProps>({
-            staff_member_id: 0,
+            teacher_id: 0,
             location_id: 0,
         });
-    const [allStaff, setAllStaff] = useState<StaffProps[]>([]);
+    const [allTeachers, setAllTeachers] = useState<AcademicUserProps[]>([]);
     const [allLocations, setAllLocations] = useState<LocationProps[]>([]);
 
     const handleSubmit = async (e: React.MouseEvent) => {
@@ -34,7 +38,7 @@ export default function EditScheduleInstance() {
             e.preventDefault();
 
             if (
-                !currentScheduleInstance.staff_member_id ||
+                !currentScheduleInstance.teacher_id ||
                 !currentScheduleInstance.location_id
             ) {
                 throw new Error('Please fill all input fields');
@@ -43,7 +47,7 @@ export default function EditScheduleInstance() {
             setLoading(true);
 
             let body: EditScheduleInstanceProps = {
-                staff_member_id: currentScheduleInstance.staff_member_id,
+                teacher_id: currentScheduleInstance.teacher_id,
                 location_id: currentScheduleInstance.location_id,
             };
 
@@ -59,7 +63,7 @@ export default function EditScheduleInstance() {
 
             const response = await res.json();
 
-            if (res.status !== 200)
+            if (!res.ok)
                 throw new Error(
                     typeof response?.detail === 'string'
                         ? response.detail
@@ -95,7 +99,7 @@ export default function EditScheduleInstance() {
 
             const response = await res.json();
 
-            if (res.status !== 200)
+            if (!res.ok)
                 throw new Error(
                     typeof response?.detail === 'string'
                         ? response.detail
@@ -103,7 +107,7 @@ export default function EditScheduleInstance() {
                 );
 
             setCurrentScheduleInstance({
-                staff_member_id: response.staff_member.id,
+                teacher_id: response.teacher.id,
                 location_id: response.location.id,
             });
         } catch (err: any) {
@@ -117,43 +121,46 @@ export default function EditScheduleInstance() {
         }
     };
 
-    const fetchAllStaff = async () => {
+    const fetchAllTeachers = async () => {
         try {
-            const res = await fetch(constants.USERS + '/staff', {
-                method: 'GET',
-                headers: {
-                    accept: 'application/json',
-                    Authorization: `Bearer ${user.accessToken}`,
+            const res = await fetch(
+                constants.USERS + '/academic?only_students=no',
+                {
+                    method: 'GET',
+                    headers: {
+                        accept: 'application/json',
+                        Authorization: `Bearer ${user.accessToken}`,
+                    },
                 },
-            });
+            );
 
             const response = await res.json();
 
-            if (res.status !== 200)
+            if (!res.ok)
                 throw new Error(
                     typeof response?.detail === 'string'
                         ? response.detail
                         : 'Something went wrong',
                 );
 
-            const staffArr: StaffProps[] = response.items.map(
-                (staff: StaffProps) => {
+            const teachersArr: AcademicUserProps[] = response.items.map(
+                (teacher: AcademicUserProps) => {
                     return {
-                        id: staff.id,
-                        full_name: staff.full_name,
-                        email: staff.email,
+                        id: teacher.id,
+                        full_name: teacher.full_name,
+                        email: teacher.email,
                         additional_details: {
-                            phone: staff.additional_details.phone,
-                            department: staff.additional_details.department,
-                            designation: staff.additional_details.designation,
+                            phone: teacher.additional_details.phone,
+                            department: teacher.additional_details.department,
+                            designation: teacher.additional_details.designation,
                         },
-                        created_at_in_utc: staff.created_at_in_utc,
-                        updated_at_in_utc: staff.updated_at_in_utc,
+                        created_at_in_utc: teacher.created_at_in_utc,
+                        updated_at_in_utc: teacher.updated_at_in_utc,
                     };
                 },
             );
 
-            setAllStaff(staffArr);
+            setAllTeachers(teachersArr);
         } catch (err: any) {
             fireToast(
                 'There seems to be a problem',
@@ -175,7 +182,7 @@ export default function EditScheduleInstance() {
 
             const response = await res.json();
 
-            if (res.status !== 200)
+            if (!res.ok)
                 throw new Error(
                     typeof response?.detail === 'string'
                         ? response.detail
@@ -208,7 +215,7 @@ export default function EditScheduleInstance() {
     useEffect(() => {
         if (id) {
             fetchScheduleInstance(parseInt(id));
-            fetchAllStaff();
+            fetchAllTeachers();
             fetchAllLocations();
         }
 
@@ -229,22 +236,22 @@ export default function EditScheduleInstance() {
                         <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                             <div className="w-full">
                                 <label className="mb-2.5 block text-black dark:text-white">
-                                    Staff member{' '}
+                                    Teacher{' '}
                                     <span className="text-meta-1">*</span>
                                 </label>
                                 <div className="relative z-20 bg-transparent dark:bg-meta-4">
                                     <select
                                         className="relative z-20 w-full appearance-none rounded border border-stroke bg-gray px-5 py-3 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-meta-4 dark:focus:border-primary"
-                                        name="staff_member_id"
-                                        id="staff_member_id"
+                                        name="teacher_id"
+                                        id="teacher_id"
                                         value={
-                                            currentScheduleInstance.staff_member_id
+                                            currentScheduleInstance.teacher_id
                                         }
                                         onChange={(e) => {
                                             setCurrentScheduleInstance(
                                                 (prev) => ({
                                                     ...prev,
-                                                    staff_member_id: parseInt(
+                                                    teacher_id: parseInt(
                                                         e.target.value,
                                                     ),
                                                 }),
@@ -252,18 +259,20 @@ export default function EditScheduleInstance() {
                                         }}
                                     >
                                         <option value="0">
-                                            Select staff member
+                                            Select teacher
                                         </option>
-                                        {allStaff.map((staff: StaffProps) => {
-                                            return (
-                                                <option
-                                                    key={staff.id}
-                                                    value={staff.id}
-                                                >
-                                                    {staff.full_name}
-                                                </option>
-                                            );
-                                        })}
+                                        {allTeachers.map(
+                                            (teacher: AcademicUserProps) => {
+                                                return (
+                                                    <option
+                                                        key={teacher.id}
+                                                        value={teacher.id}
+                                                    >
+                                                        {teacher.full_name}
+                                                    </option>
+                                                );
+                                            },
+                                        )}
                                     </select>
                                     <span className="absolute right-4 top-1/2 z-30 -translate-y-1/2">
                                         <svg

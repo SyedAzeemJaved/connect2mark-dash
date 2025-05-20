@@ -1,16 +1,16 @@
 # Connect2Mark Microblading - Admin Dashboard based on React using Tailwind and TailAdmin Template
 
-This is the Git repository for Connect2Mark Admin dashboard built with **React, TypeScript and Tailwind CSS**, which let's you manage all users and staff members on Connect2Mark.
+This is the Git repository for Connect2Mark Admin dashboard built with **React, TypeScript and Tailwind CSS**, which let's you manage all users and academic users on Connect2Mark.
 
 ## Installation
 
 You'll need to install Node.js >=v14.16+ (Recommended Version) (NPM comes along with it) and TailAdmin uses **Vite** for frontend tooling, to peform installation and building production version, please follow these steps from below:
 
-- Use terminal and navigate to the project (tailadmin-react) root.
+-   Use terminal and navigate to the project (tailadmin-react) root.
 
-- Then run : <code>npm install</code>
+-   Then run : <code>npm install</code>
 
-- Then run : <code>npm run dev</code>
+-   Then run : <code>npm run dev</code>
 
 Now, in the browser go to <code>localhost:5000</code>
 

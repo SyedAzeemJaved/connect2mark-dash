@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useContext } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { AuthContext } from '@context';
 
@@ -13,26 +13,20 @@ import { convertUTCTimeToLocalTime, TimestampConverter } from '@utils';
 import { FireToastEnum } from '@enums';
 
 import type {
+    ScheduleInstanceProps,
     ApiResponse,
     UserContextProps,
-    ScheduleInstanceProps,
 } from '@types';
 
-type FilterSelectedProps = {
-    filter: 'date' | 'today';
-    date: string | null;
-};
+export default function AcademicUserSpecificTodayScheduleInstances() {
+    const { id } = useParams();
 
-export default function FilterScheduleInstances() {
     const { user } = useContext(AuthContext) as UserContextProps;
 
-    const [AllScheduleInstances, setAllScheduleInstances] = useState<
-        ScheduleInstanceProps[]
-    >([]);
-    const [selectedFilter, setSelectedFilter] = useState<FilterSelectedProps>({
-        filter: 'today',
-        date: null,
-    });
+    const [
+        academicUserTodayAllScheduleInstances,
+        academicUseraffTodayAllScheduleInstances,
+    ] = useState<ScheduleInstanceProps[]>([]);
     const [pageNumber, setPageNumber] = useState(1);
     const [apiResponse, setApiResponse] = useState<ApiResponse>({
         total: 0,
@@ -43,62 +37,6 @@ export default function FilterScheduleInstances() {
     });
 
     const navigate = useNavigate();
-
-    const isDateValidRegex = (inputDate: string) => {
-        const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-        // If the format doesn't match 'YYYY-MM-DD'
-        if (dateRegex.test(inputDate)) {
-            return true;
-        }
-        // fireToast(
-        //   'Invalid date format',
-        //   'Please enter date in YYYY-MM-DD format',
-        //   FireToastEnum.WARNING,
-        // );
-        return false;
-    };
-
-    const isDateValid = (inputDate: string) => {
-        // If it's an invalid date (e.g., February 31)
-        const dateParts = inputDate.split('-');
-        const year = parseInt(dateParts[0]);
-        const month = parseInt(dateParts[1]) - 1; // Month is 0-indexed in JavaScript (0 - 11)
-        const day = parseInt(dateParts[2]);
-
-        const dateObject = new Date(year, month, day);
-
-        if (
-            dateObject.getFullYear() !== year ||
-            dateObject.getMonth() !== month ||
-            dateObject.getDate() !== day
-        ) {
-            fireToast(
-                'Invalid date',
-                'Please enter a valid date in YYYY-MM-DD format',
-                FireToastEnum.WARNING,
-            );
-            return false;
-        }
-        return true;
-    };
-
-    const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        // All checks were true
-        setSelectedFilter({
-            ...selectedFilter,
-            [e.target.name]: e.target.value,
-        });
-    };
-
-    const handleSelectedFilterChange: React.MouseEventHandler<
-        HTMLButtonElement
-    > = (e) => {
-        setAllScheduleInstances([]);
-        setSelectedFilter({
-            ...selectedFilter,
-            filter: e.currentTarget.name as any,
-        });
-    };
 
     const handleEditClick = (id: number) => {
         navigate(`/classes/${id}`);
@@ -140,43 +78,15 @@ export default function FilterScheduleInstances() {
                     FireToastEnum.DANGER,
                 );
             } finally {
-                fetchScheduleInstances();
+                fetchAcademicUserTodayScheduleInstances();
             }
         }
     };
 
-    const fetchScheduleInstances = async () => {
+    const fetchAcademicUserTodayScheduleInstances = async () => {
         try {
-            setApiResponse({
-                total: 0,
-                page: 0,
-                size: constants.RESULTS_PER_PAGE,
-                pages: 0,
-                items: [],
-            });
-
-            if (selectedFilter.filter === 'date') {
-                if (
-                    selectedFilter.date === '' ||
-                    selectedFilter.date === null
-                ) {
-                    return;
-                }
-                if (!isDateValidRegex(selectedFilter.date)) {
-                    return;
-                }
-                if (!isDateValid(selectedFilter.date)) {
-                    return;
-                }
-            }
-
-            const url =
-                selectedFilter.filter === 'today'
-                    ? `${constants.SCHEDULE_INSTANCES}/today`
-                    : `${constants.SCHEDULE_INSTANCES}/date/${selectedFilter.date}`;
-
             const res = await fetch(
-                `${url}?page=${pageNumber}&size=${constants.RESULTS_PER_PAGE}`,
+                `${constants.SCHEDULE_INSTANCES}/today/${id}?page=${pageNumber}&size=${constants.RESULTS_PER_PAGE}`,
                 {
                     method: 'GET',
                     headers: {
@@ -203,27 +113,7 @@ export default function FilterScheduleInstances() {
                             start_time_in_utc:
                                 schedule_instance.start_time_in_utc,
                             end_time_in_utc: schedule_instance.end_time_in_utc,
-                            schedule: {
-                                id: schedule_instance.schedule.id,
-                                title: schedule_instance.schedule.title,
-                                start_time_in_utc:
-                                    schedule_instance.schedule
-                                        .start_time_in_utc,
-                                end_time_in_utc:
-                                    schedule_instance.schedule.end_time_in_utc,
-                                is_reoccurring:
-                                    schedule_instance.schedule.is_reoccurring,
-                                teacher: schedule_instance.schedule.teacher,
-                                location: schedule_instance.schedule.location,
-                                date: schedule_instance.schedule.date,
-                                day: schedule_instance.schedule.day,
-                                created_at_in_utc:
-                                    schedule_instance.schedule
-                                        .created_at_in_utc,
-                                updated_at_in_utc:
-                                    schedule_instance.schedule
-                                        .updated_at_in_utc,
-                            },
+                            schedule: schedule_instance.schedule,
                             teacher: {
                                 id: schedule_instance.teacher.id,
                                 full_name: schedule_instance.teacher.full_name,
@@ -275,7 +165,7 @@ export default function FilterScheduleInstances() {
                 items: response?.items,
             });
 
-            setAllScheduleInstances(scheduleInstanceArr);
+            academicUseraffTodayAllScheduleInstances(scheduleInstanceArr);
         } catch (err: any) {
             fireToast(
                 'There seems to be a problem',
@@ -286,82 +176,15 @@ export default function FilterScheduleInstances() {
     };
 
     useEffect(() => {
-        fetchScheduleInstances();
+        fetchAcademicUserTodayScheduleInstances();
 
         return () => {};
-    }, [pageNumber, selectedFilter]);
+    }, [pageNumber]);
 
     return (
         <>
-            <Breadcrumb pageName="Filter Classes" />
-
+            <Breadcrumb pageName="Academic User Today Classes" />
             <div className="flex flex-col gap-6">
-                <div className="flex flex-row justify-end gap-4 text-center align-bottom font-medium text-white">
-                    <button
-                        className={`inline-flex items-center justify-center gap-2.5 px-10 py-4 hover:bg-opacity-90 lg:px-8 xl:px-10 ${
-                            selectedFilter.filter === 'date'
-                                ? 'bg-primary'
-                                : 'bg-graydark '
-                        }`}
-                        name="date"
-                        onClick={handleSelectedFilterChange}
-                    >
-                        <span>
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 20 20"
-                                className="h-5 w-5 fill-current"
-                            >
-                                <path
-                                    fillRule="evenodd"
-                                    d="M5.75 2a.75.75 0 0 1 .75.75V4h7V2.75a.75.75 0 0 1 1.5 0V4h.25A2.75 2.75 0 0 1 18 6.75v8.5A2.75 2.75 0 0 1 15.25 18H4.75A2.75 2.75 0 0 1 2 15.25v-8.5A2.75 2.75 0 0 1 4.75 4H5V2.75A.75.75 0 0 1 5.75 2Zm-1 5.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25H4.75Z"
-                                    clipRule="evenodd"
-                                />
-                            </svg>
-                        </span>
-                        Date
-                    </button>
-                    <button
-                        className={`inline-flex items-center justify-center gap-2.5 px-10 py-4 hover:bg-opacity-90 lg:px-8 xl:px-10 ${
-                            selectedFilter.filter === 'today'
-                                ? 'bg-primary'
-                                : 'bg-graydark '
-                        }`}
-                        name="today"
-                        onClick={handleSelectedFilterChange}
-                    >
-                        <span>
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 20 20"
-                                className="h-5 w-5 fill-current"
-                            >
-                                <path
-                                    fillRule="evenodd"
-                                    d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm.75-13a.75.75 0 0 0-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 0 0 0-1.5h-3.25V5Z"
-                                    clipRule="evenodd"
-                                />
-                            </svg>
-                        </span>
-                        Today
-                    </button>
-                </div>
-
-                <div className="flex flex-row justify-end gap-4 text-center align-bottom font-medium text-white">
-                    {selectedFilter.filter === 'date' && (
-                        <input
-                            type="text"
-                            placeholder="Enter class date [YYYY-MM-DD]"
-                            className="w-1/3 rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                            name="date"
-                            id="date"
-                            pattern="\d{4}-\d{2}-\d{2}"
-                            value={selectedFilter.date ?? ''}
-                            onChange={handleDateChange}
-                        />
-                    )}
-                </div>
-
                 <Pagination
                     pageNumber={pageNumber}
                     setPageNumber={setPageNumber}
@@ -372,9 +195,6 @@ export default function FilterScheduleInstances() {
                             <table className="w-full table-auto">
                                 <thead className="text-left">
                                     <tr className="bg-gray-2 dark:bg-meta-4">
-                                        <th className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
-                                            Title
-                                        </th>
                                         <th
                                             className="min-w-[440px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11"
                                             colSpan={2}
@@ -416,9 +236,14 @@ export default function FilterScheduleInstances() {
                                         </th>
                                     </tr>
                                     <tr>
-                                        {/* Title */}
-                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white"></th>
                                         {/* Teacher */}
+                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white">
+                                            Original
+                                        </th>
+                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white">
+                                            Current
+                                        </th>
+                                        {/* Location */}
                                         <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white">
                                             Original
                                         </th>
@@ -446,30 +271,13 @@ export default function FilterScheduleInstances() {
                                         <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white">
                                             Current
                                         </th>
-                                        {/* Date */}
-                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white">
-                                            Original
-                                        </th>
-                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white">
-                                            Current
-                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {AllScheduleInstances.map(
+                                    {academicUserTodayAllScheduleInstances.map(
                                         (schedule_instance) => {
                                             return (
                                                 <tr key={schedule_instance.id}>
-                                                    {/* Title */}
-                                                    <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-                                                        <p className="text-black dark:text-white">
-                                                            {
-                                                                schedule_instance
-                                                                    .schedule
-                                                                    .title
-                                                            }
-                                                        </p>
-                                                    </td>
                                                     {/* Original Teacher */}
                                                     <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                                                         <p className="text-black dark:text-white">
@@ -563,9 +371,9 @@ export default function FilterScheduleInstances() {
                                                             )}
                                                         </p>
                                                     </td>
-                                                    {/* Origianl Date */}
+                                                    {/* Original Date */}
                                                     <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-                                                        <p className="text-black dark:text-white">
+                                                        <p className="capitalize text-black dark:text-white">
                                                             {
                                                                 schedule_instance
                                                                     .schedule
@@ -575,7 +383,7 @@ export default function FilterScheduleInstances() {
                                                     </td>
                                                     {/* Current Date */}
                                                     <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-                                                        <p className="text-black dark:text-white">
+                                                        <p className="capitalize text-black dark:text-white">
                                                             {
                                                                 schedule_instance.date
                                                             }

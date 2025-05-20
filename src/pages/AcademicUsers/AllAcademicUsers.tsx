@@ -36,11 +36,11 @@ export default function AllAcademicUsers(props: ListingPageProps) {
         );
     };
 
-    const handleStaffSchedules = (id: number) => {
+    const handleAcademicUserSchedules = (id: number) => {
         navigate(`/schedules/academic/${id}`);
     };
 
-    const handleStaffTodayScheduleInstances = (id: number) => {
+    const handleAcademicUserTodayClassSchedule = (id: number) => {
         navigate(`/classes/academic/today/${id}`);
     };
 
@@ -272,7 +272,7 @@ export default function AllAcademicUsers(props: ListingPageProps) {
                                                         <button
                                                             className="hover:text-primary"
                                                             onClick={() =>
-                                                                handleStaffSchedules(
+                                                                handleAcademicUserSchedules(
                                                                     academicUser.id,
                                                                 )
                                                             }
@@ -295,7 +295,7 @@ export default function AllAcademicUsers(props: ListingPageProps) {
                                                         <button
                                                             className="hover:text-primary"
                                                             onClick={() =>
-                                                                handleStaffTodayScheduleInstances(
+                                                                handleAcademicUserTodayClassSchedule(
                                                                     academicUser.id,
                                                                 )
                                                             }

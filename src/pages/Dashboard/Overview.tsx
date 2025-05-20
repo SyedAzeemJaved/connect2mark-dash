@@ -27,7 +27,7 @@ interface DashboardOverviewProps {
 }
 
 interface GraphQueryProps {
-    selectedStaffMember: AcademicUserProps | null;
+    selectedTeacher: AcademicUserProps | null;
     startDate: Date | null;
     fetchRange: 'week' | 'month';
 }
@@ -48,14 +48,12 @@ const Overview = () => {
     >({});
 
     const [graphQueryValues, setGraphQueryValues] = useState<GraphQueryProps>({
-        selectedStaffMember: null,
+        selectedTeacher: null,
         startDate: daysFromToday(7),
         fetchRange: 'week',
     });
 
-    const [allStaffMembers, setAllStaffMembers] = useState<AcademicUserProps[]>(
-        [],
-    );
+    const [allTeachers, setAllTeachers] = useState<AcademicUserProps[]>([]);
 
     const fetchStats = async () => {
         try {
@@ -69,7 +67,7 @@ const Overview = () => {
 
             const response = await res.json();
 
-            if (res.status !== 200)
+            if (!res.ok)
                 throw new Error(
                     typeof response?.detail === 'string'
                         ? response.detail
@@ -118,7 +116,7 @@ const Overview = () => {
                 (item: AcademicUserProps) => item,
             );
 
-            setAllStaffMembers(teachersArr);
+            setAllTeachers(teachersArr);
         } catch (err: any) {
             fireToast(
                 'There seems to be a problem',
@@ -136,38 +134,34 @@ const Overview = () => {
     }, []);
 
     useEffect(() => {
-        if (allStaffMembers.length > 0) {
+        if (allTeachers.length > 0) {
             setGraphQueryValues((prev) => ({
                 ...prev,
-                selectedStaffMember: allStaffMembers[0],
+                selectedTeacher: allTeachers[0],
             }));
         }
-    }, [allStaffMembers]);
+    }, [allTeachers]);
 
     useEffect(() => {
         (async () => {
-            if (graphQueryValues.selectedStaffMember?.id) {
+            if (graphQueryValues.selectedTeacher?.id) {
                 try {
                     const res = await fetch(
                         constants.ATTENDANCE_RESULT +
-                            `/${graphQueryValues.selectedStaffMember.id}`,
+                            `/${graphQueryValues.selectedTeacher.id}?start_date=${formatDateToApiFormatString(
+                                graphQueryValues.fetchRange === 'week'
+                                    ? daysFromToday(-7)
+                                    : daysFromToday(-30),
+                            )}&end_date=${formatDateToApiFormatString(
+                                new Date(),
+                            )}`,
                         {
-                            method: 'POST',
+                            method: 'GET',
                             headers: {
                                 accept: 'application/json',
                                 'Content-Type': 'application/json',
                                 Authorization: `Bearer ${user.accessToken}`,
                             },
-                            body: JSON.stringify({
-                                start_date: formatDateToApiFormatString(
-                                    graphQueryValues.fetchRange === 'week'
-                                        ? daysFromToday(-7)
-                                        : daysFromToday(-30),
-                                ),
-                                end_date: formatDateToApiFormatString(
-                                    new Date(),
-                                ),
-                            }),
                         },
                     );
 
@@ -192,15 +186,15 @@ const Overview = () => {
         })();
     }, [graphQueryValues]);
 
-    const handleSetStaffMember = (e: ChangeEvent<HTMLSelectElement>) => {
-        const staffMemeber = allStaffMembers.find(
-            (staff) => staff.id === parseInt(e.currentTarget.value),
+    const handleSetTeacher = (e: ChangeEvent<HTMLSelectElement>) => {
+        const teacher = allTeachers.find(
+            (_) => _.id === parseInt(e.currentTarget.value),
         );
 
-        if (staffMemeber) {
+        if (teacher) {
             setGraphQueryValues((prev) => ({
                 ...prev,
-                selectedStaffMember: staffMemeber,
+                selectedTeacher: teacher,
             }));
         }
     };
@@ -263,9 +257,9 @@ const Overview = () => {
                     handleFetchRangeChange={handleFetchRangeChange}
                 />
                 <Graph2
-                    allStaffMembers={allStaffMembers}
+                    allTeachers={allTeachers}
                     graphData={graphData}
-                    handleSetStaffMember={handleSetStaffMember}
+                    handleSetTeacher={handleSetTeacher}
                 />
 
                 {/* <div className="col-span-12 rounded-sm border border-stroke bg-white p-7.5 shadow-default dark:border-strokedark dark:bg-boxdark xl:col-span-4">

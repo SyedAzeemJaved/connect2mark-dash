@@ -483,9 +483,9 @@ export default function FilterSchedules() {
                                         <th className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
                                             Status
                                         </th>
-                                        {/* <th className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
-                                            Staff member
-                                        </th> */}
+                                        <th className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
+                                            Teacher
+                                        </th>
                                         <th className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
                                             Location
                                         </th>
@@ -528,22 +528,17 @@ export default function FilterSchedules() {
                                                             : 'Non-reoccurring'}
                                                     </p>
                                                 </td>
-                                                {/* <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+                                                <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                                                     <p className="text-black dark:text-white">
                                                         {
-                                                            schedule
-                                                                .staff_member
+                                                            schedule.teacher
                                                                 .full_name
                                                         }
                                                     </p>
                                                     <span className="text-sm">
-                                                        {
-                                                            schedule
-                                                                .staff_member
-                                                                .email
-                                                        }
+                                                        {schedule.teacher.email}
                                                     </span>
-                                                </td> */}
+                                                </td>
                                                 <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                                                     <p className="text-black dark:text-white">
                                                         {

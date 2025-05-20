@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 
 import { AuthContext } from '@context';
 
@@ -12,19 +12,16 @@ import { convertUTCTimeToLocalTime, TimestampConverter } from '@utils';
 
 import { FireToastEnum } from '@enums';
 
-import type {
-    ScheduleInstanceProps,
-    ApiResponse,
-    UserContextProps,
-} from '@types';
+import type { ScheduleProps, ApiResponse, UserContextProps } from '@types';
 
-export default function StaffSpecificTodayScheduleInstances() {
+export default function AcademicUserSpecificSchedules() {
     const { id } = useParams();
 
     const { user } = useContext(AuthContext) as UserContextProps;
 
-    const [staffTodayAllScheduleInstances, setStaffTodayAllScheduleInstances] =
-        useState<ScheduleInstanceProps[]>([]);
+    const [academicUserAllSchedules, setAcademicUserAllSchedules] = useState<
+        ScheduleProps[]
+    >([]);
     const [pageNumber, setPageNumber] = useState(1);
     const [apiResponse, setApiResponse] = useState<ApiResponse>({
         total: 0,
@@ -37,27 +34,25 @@ export default function StaffSpecificTodayScheduleInstances() {
     const navigate = useNavigate();
 
     const handleEditClick = (id: number) => {
-        navigate(`/classes/${id}`);
+        navigate(`/schedules/${id}`);
     };
 
     const handleDeleteClick = async (id: number) => {
-        let r = confirm('Are you sure you want to delete this class?');
+        let r = confirm('Are you sure you want to delete this schedule?');
+
         if (r === true) {
             try {
-                const res = await fetch(
-                    `${constants.SCHEDULE_INSTANCES}/${id}`,
-                    {
-                        method: 'DELETE',
-                        headers: {
-                            accept: 'application/json',
-                            Authorization: `Bearer ${user.accessToken}`,
-                        },
+                const res = await fetch(`${constants.SCHEDULES}/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        accept: 'application/json',
+                        Authorization: `Bearer ${user.accessToken}`,
                     },
-                );
+                });
 
                 const response = await res.json();
 
-                if (res.status !== 200)
+                if (!res.ok)
                     throw new Error(
                         typeof response?.detail === 'string'
                             ? response.detail
@@ -66,7 +61,7 @@ export default function StaffSpecificTodayScheduleInstances() {
 
                 fireToast(
                     'Success',
-                    'Class deleted successfully',
+                    'Schedule deleted successfully',
                     FireToastEnum.SUCCESS,
                 );
             } catch (err: any) {
@@ -76,15 +71,15 @@ export default function StaffSpecificTodayScheduleInstances() {
                     FireToastEnum.DANGER,
                 );
             } finally {
-                fetchStaffTodayScheduleInstances();
+                fetchAcademicUserSpecificSchedules();
             }
         }
     };
 
-    const fetchStaffTodayScheduleInstances = async () => {
+    const fetchAcademicUserSpecificSchedules = async () => {
         try {
             const res = await fetch(
-                `${constants.SCHEDULE_INSTANCES}/today/${id}?page=${pageNumber}&size=${constants.RESULTS_PER_PAGE}`,
+                `${constants.SCHEDULES}/academic/${id}?page=${pageNumber}&size=${constants.RESULTS_PER_PAGE}`,
                 {
                     method: 'GET',
                     headers: {
@@ -96,67 +91,58 @@ export default function StaffSpecificTodayScheduleInstances() {
 
             const response = await res.json();
 
-            if (res.status !== 200)
+            if (!res.ok)
                 throw new Error(
                     typeof response?.detail === 'string'
                         ? response.detail
                         : 'Something went wrong',
                 );
 
-            const scheduleInstanceArr: ScheduleInstanceProps[] =
-                response.items.map(
-                    (schedule_instance: ScheduleInstanceProps) => {
-                        return {
-                            id: schedule_instance.id,
-                            start_time_in_utc:
-                                schedule_instance.start_time_in_utc,
-                            end_time_in_utc: schedule_instance.end_time_in_utc,
-                            schedule: schedule_instance.schedule,
-                            staff_member: {
-                                id: schedule_instance.staff_member.id,
-                                full_name:
-                                    schedule_instance.staff_member.full_name,
-                                email: schedule_instance.staff_member.email,
-                                additional_details: {
-                                    phone: schedule_instance.staff_member
-                                        .additional_details.phone,
-                                    department:
-                                        schedule_instance.staff_member
-                                            .additional_details.department,
-                                    designation:
-                                        schedule_instance.staff_member
-                                            .additional_details.designation,
-                                },
-                                created_at_in_utc:
-                                    schedule_instance.staff_member
-                                        .created_at_in_utc,
-                                updated_at_in_utc:
-                                    schedule_instance.staff_member
-                                        .updated_at_in_utc,
+            const scheduleArr: ScheduleProps[] = response.items.map(
+                (schedule: ScheduleProps) => {
+                    return {
+                        id: schedule.id,
+                        title: schedule.title,
+                        start_time_in_utc: schedule.start_time_in_utc,
+                        end_time_in_utc: schedule.end_time_in_utc,
+                        is_reoccurring: schedule.is_reoccurring,
+                        teacher: {
+                            id: schedule.teacher.id,
+                            full_name: schedule.teacher.full_name,
+                            email: schedule.teacher.email,
+                            additional_details: {
+                                phone: schedule.teacher.additional_details
+                                    .phone,
+                                department:
+                                    schedule.teacher.additional_details
+                                        .department,
+                                designation:
+                                    schedule.teacher.additional_details
+                                        .designation,
                             },
-                            location: {
-                                id: schedule_instance.location.id,
-                                title: schedule_instance.location.title,
-                                bluetooth_address:
-                                    schedule_instance.location
-                                        .bluetooth_address,
-                                coordinates:
-                                    schedule_instance.location.coordinates,
-                                created_at_in_utc:
-                                    schedule_instance.location
-                                        .created_at_in_utc,
-                                updated_at_in_utc:
-                                    schedule_instance.location
-                                        .updated_at_in_utc,
-                            },
-                            date: schedule_instance.date,
                             created_at_in_utc:
-                                schedule_instance.created_at_in_utc,
+                                schedule.teacher.created_at_in_utc,
                             updated_at_in_utc:
-                                schedule_instance.updated_at_in_utc,
-                        };
-                    },
-                );
+                                schedule.teacher.updated_at_in_utc,
+                        },
+                        location: {
+                            id: schedule.location.id,
+                            title: schedule.location.title,
+                            bluetooth_address:
+                                schedule.location.bluetooth_address,
+                            coordinates: schedule.location.coordinates,
+                            created_at_in_utc:
+                                schedule.location.created_at_in_utc,
+                            updated_at_in_utc:
+                                schedule.location.updated_at_in_utc,
+                        },
+                        date: schedule.date,
+                        day: schedule.day,
+                        created_at_in_utc: schedule.created_at_in_utc,
+                        updated_at_in_utc: schedule.updated_at_in_utc,
+                    };
+                },
+            );
 
             setApiResponse({
                 total: response?.total,
@@ -166,7 +152,7 @@ export default function StaffSpecificTodayScheduleInstances() {
                 items: response?.items,
             });
 
-            setStaffTodayAllScheduleInstances(scheduleInstanceArr);
+            setAcademicUserAllSchedules(scheduleArr);
         } catch (err: any) {
             fireToast(
                 'There seems to be a problem',
@@ -177,15 +163,33 @@ export default function StaffSpecificTodayScheduleInstances() {
     };
 
     useEffect(() => {
-        fetchStaffTodayScheduleInstances();
+        fetchAcademicUserSpecificSchedules();
 
         return () => {};
     }, [pageNumber]);
 
     return (
         <>
-            <Breadcrumb pageName="Staff Today Classes" />
+            <Breadcrumb pageName="Academic User Schedules" />
             <div className="flex flex-col gap-6">
+                <div className="flex flex-row justify-end align-bottom">
+                    <Link
+                        to="/schedules/add"
+                        className="inline-flex items-center justify-center gap-2.5 bg-primary px-10 py-4 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
+                    >
+                        <span>
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 20 20"
+                                className="h-5 w-5 fill-current"
+                            >
+                                <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+                            </svg>
+                        </span>
+                        Add new
+                    </Link>
+                </div>
+
                 <Pagination
                     pageNumber={pageNumber}
                     setPageNumber={setPageNumber}
@@ -194,36 +198,30 @@ export default function StaffSpecificTodayScheduleInstances() {
                     <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
                         <div className="max-w-full overflow-x-auto">
                             <table className="w-full table-auto">
-                                <thead className="text-left">
-                                    <tr className="bg-gray-2 dark:bg-meta-4">
-                                        <th
-                                            className="min-w-[440px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11"
-                                            colSpan={2}
-                                        >
-                                            Staff member
+                                <thead>
+                                    <tr className="bg-gray-2 text-left dark:bg-meta-4">
+                                        <th className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
+                                            Title
                                         </th>
-                                        <th
-                                            className="min-w-[440px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11"
-                                            colSpan={2}
-                                        >
+                                        <th className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
+                                            Status
+                                        </th>
+                                        <th className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
+                                            Teacher
+                                        </th>
+                                        <th className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
                                             Location
                                         </th>
-                                        <th
-                                            className="min-w-[440px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11"
-                                            colSpan={2}
-                                        >
+                                        <th className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
                                             Start
                                         </th>
-                                        <th
-                                            className="min-w-[440px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11"
-                                            colSpan={2}
-                                        >
+                                        <th className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
                                             End
                                         </th>
-                                        <th
-                                            className="min-w-[440px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11"
-                                            colSpan={2}
-                                        >
+                                        <th className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
+                                            Day
+                                        </th>
+                                        <th className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
                                             Date
                                         </th>
                                         <th className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
@@ -236,171 +234,82 @@ export default function StaffSpecificTodayScheduleInstances() {
                                             Actions
                                         </th>
                                     </tr>
-                                    <tr>
-                                        {/* Staff Member */}
-                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white">
-                                            Original
-                                        </th>
-                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white">
-                                            Current
-                                        </th>
-                                        {/* Location */}
-                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white">
-                                            Original
-                                        </th>
-                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white">
-                                            Current
-                                        </th>
-                                        {/* Location */}
-                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white">
-                                            Original
-                                        </th>
-                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white">
-                                            Current
-                                        </th>
-                                        {/* Start */}
-                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white">
-                                            Original
-                                        </th>
-                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white">
-                                            Current
-                                        </th>
-                                        {/* End */}
-                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white">
-                                            Original
-                                        </th>
-                                        <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white">
-                                            Current
-                                        </th>
-                                    </tr>
                                 </thead>
                                 <tbody>
-                                    {staffTodayAllScheduleInstances.map(
-                                        (schedule_instance) => {
+                                    {academicUserAllSchedules.map(
+                                        (schedule) => {
                                             return (
-                                                <tr key={schedule_instance.id}>
-                                                    {/* Original Staff Member */}
+                                                <tr key={schedule.id}>
+                                                    <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+                                                        <p className="text-black dark:text-white">
+                                                            {schedule.title}
+                                                        </p>
+                                                    </td>
+                                                    <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+                                                        <p className="text-black dark:text-white">
+                                                            {schedule.is_reoccurring
+                                                                ? 'Reoccurring'
+                                                                : 'Non-reoccurring'}
+                                                        </p>
+                                                    </td>
                                                     <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                                                         <p className="text-black dark:text-white">
                                                             {
-                                                                schedule_instance
-                                                                    .schedule
-                                                                    .staff_member
+                                                                schedule.teacher
                                                                     .full_name
                                                             }
                                                         </p>
                                                         <span className="text-sm">
                                                             {
-                                                                schedule_instance
-                                                                    .schedule
-                                                                    .staff_member
+                                                                schedule.teacher
                                                                     .email
                                                             }
                                                         </span>
                                                     </td>
-                                                    {/* Current Staff Member */}
                                                     <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                                                         <p className="text-black dark:text-white">
                                                             {
-                                                                schedule_instance
-                                                                    .staff_member
-                                                                    .full_name
-                                                            }
-                                                        </p>
-                                                        <span className="text-sm">
-                                                            {
-                                                                schedule_instance
-                                                                    .staff_member
-                                                                    .email
-                                                            }
-                                                        </span>
-                                                    </td>
-                                                    {/* Original Location */}
-                                                    <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-                                                        <p className="text-black dark:text-white">
-                                                            {
-                                                                schedule_instance
-                                                                    .schedule
+                                                                schedule
                                                                     .location
                                                                     .title
                                                             }
                                                         </p>
                                                     </td>
-                                                    {/* Current Location */}
-                                                    <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-                                                        <p className="text-black dark:text-white">
-                                                            {
-                                                                schedule_instance
-                                                                    .location
-                                                                    .title
-                                                            }
-                                                        </p>
-                                                    </td>
-                                                    {/* Original Start */}
                                                     <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                                                         <p className="text-black dark:text-white">
                                                             {convertUTCTimeToLocalTime(
-                                                                schedule_instance
-                                                                    .schedule
-                                                                    .start_time_in_utc,
+                                                                schedule.start_time_in_utc,
                                                             )}
                                                         </p>
                                                     </td>
-                                                    {/* Current Start */}
                                                     <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                                                         <p className="text-black dark:text-white">
                                                             {convertUTCTimeToLocalTime(
-                                                                schedule_instance.start_time_in_utc,
+                                                                schedule.end_time_in_utc,
                                                             )}
                                                         </p>
                                                     </td>
-                                                    {/* Original End */}
-                                                    <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-                                                        <p className="text-black dark:text-white">
-                                                            {convertUTCTimeToLocalTime(
-                                                                schedule_instance
-                                                                    .schedule
-                                                                    .end_time_in_utc,
-                                                            )}
-                                                        </p>
-                                                    </td>
-                                                    {/* Current End */}
-                                                    <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-                                                        <p className="text-black dark:text-white">
-                                                            {convertUTCTimeToLocalTime(
-                                                                schedule_instance.end_time_in_utc,
-                                                            )}
-                                                        </p>
-                                                    </td>
-                                                    {/* Original Date */}
                                                     <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                                                         <p className="capitalize text-black dark:text-white">
-                                                            {
-                                                                schedule_instance
-                                                                    .schedule
-                                                                    .date
-                                                            }
+                                                            {schedule.day}
                                                         </p>
                                                     </td>
-                                                    {/* Current Date */}
                                                     <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-                                                        <p className="capitalize text-black dark:text-white">
-                                                            {
-                                                                schedule_instance.date
-                                                            }
+                                                        <p className="text-black dark:text-white">
+                                                            {schedule.date}
                                                         </p>
                                                     </td>
                                                     <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                                                         <p className="text-black dark:text-white">
                                                             {TimestampConverter(
-                                                                schedule_instance.created_at_in_utc,
+                                                                schedule.created_at_in_utc,
                                                             )}
                                                         </p>
                                                     </td>
                                                     <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                                                         <p className="text-black dark:text-white">
                                                             {TimestampConverter(
-                                                                schedule_instance?.updated_at_in_utc,
+                                                                schedule?.updated_at_in_utc,
                                                             )}
                                                         </p>
                                                     </td>
@@ -410,7 +319,7 @@ export default function StaffSpecificTodayScheduleInstances() {
                                                                 className="hover:text-primary"
                                                                 onClick={() =>
                                                                     handleEditClick(
-                                                                        schedule_instance.id,
+                                                                        schedule.id,
                                                                     )
                                                                 }
                                                             >
@@ -436,7 +345,7 @@ export default function StaffSpecificTodayScheduleInstances() {
                                                                 className="hover:text-primary"
                                                                 onClick={() =>
                                                                     handleDeleteClick(
-                                                                        schedule_instance.id,
+                                                                        schedule.id,
                                                                     )
                                                                 }
                                                             >

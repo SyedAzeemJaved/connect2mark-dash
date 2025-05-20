@@ -9,9 +9,12 @@ export const daysFromToday = (days: number): Date => {
 };
 
 export function TimestampConverter(timestampValue: string | undefined | null) {
-    if (timestampValue && typeof (timestampValue === 'string')) {
+    if (timestampValue && typeof timestampValue === 'string') {
+        // Parse the timestamp and convert it to UTC
         const date = new Date(timestampValue);
-        const formattedTimeAgo = formatDistanceToNow(date);
+        const utcDate = new Date(date.getTime() + date.getTimezoneOffset());
+
+        const formattedTimeAgo = formatDistanceToNow(utcDate);
         return `${formattedTimeAgo} ago`;
     } else {
         return 'Never';
@@ -37,6 +40,7 @@ export function convertTo24HourUTC(time12Hour: string): string {
 export function convertToUTCDate(inputDate: string): string {
     const date = new Date(inputDate);
     const utcDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+
     return utcDate.toISOString().split('T')[0]; // Extracts YYYY-MM-DD from the ISO string
 }
 

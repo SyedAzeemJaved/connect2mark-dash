@@ -134,6 +134,8 @@ export default function AddSchedule() {
             return;
         }
 
+        console.log(e.target.value);
+
         // All checks were true
         setData((prev) => ({
             ...prev,
@@ -404,7 +406,7 @@ export default function AddSchedule() {
                         <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                             <div className="w-full">
                                 <label className="mb-2.5 block text-black dark:text-white">
-                                    Staff member{' '}
+                                    Teacher{' '}
                                     <span className="text-meta-1">*</span>
                                 </label>
                                 <div className="relative z-20">
@@ -423,7 +425,7 @@ export default function AddSchedule() {
                                         }}
                                     >
                                         <option value="0">
-                                            Select staff member
+                                            Select teacher
                                         </option>
                                         {data?.teachers?.map(
                                             (

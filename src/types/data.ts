@@ -56,6 +56,7 @@ export interface ScheduleProps {
     readonly is_reoccurring: boolean;
 
     readonly location: LocationProps;
+    readonly teacher: AcademicUserProps;
 
     readonly date: string | null;
     readonly day:
@@ -79,6 +80,7 @@ export interface ScheduleInstanceProps {
 
     readonly schedule: ScheduleProps;
     readonly location: LocationProps;
+    readonly teacher: AcademicUserProps;
 
     readonly date: string;
 

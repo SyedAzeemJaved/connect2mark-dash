@@ -30,8 +30,8 @@ const EditSchedule = lazy(() => import('../pages/Schedules/EditSchedule'));
 const FilterSchedules = lazy(
     () => import('../pages/Schedules/FilterSchedules'),
 );
-const StaffSpecificSchedules = lazy(
-    () => import('../pages/Schedules/StaffSpecificSchedules'),
+const AcademicUserSpecificSchedules = lazy(
+    () => import('../pages/Schedules/AcademicUserSpecificSchedules'),
 );
 
 // Schedule Instances / Classes
@@ -44,8 +44,8 @@ const EditScheduleInstance = lazy(
 const FilterScheduleInstance = lazy(
     () => import('../pages/Classes/FilterScheduleInstances'),
 );
-const StaffSpecificTodayScheduleInstances = lazy(
-    () => import('../pages/Classes/StaffSpecificTodayScheduleInstances'),
+const AcademicUserSpecificTodayScheduleInstances = lazy(
+    () => import('../pages/Classes/AcademicUserSpecificTodayScheduleInstances'),
 );
 
 const coreRoutes = [
@@ -146,9 +146,9 @@ const coreRoutes = [
         props: {},
     },
     {
-        path: '/schedules/staff/:id',
-        title: 'Staff Schedules',
-        component: StaffSpecificSchedules,
+        path: '/schedules/academic/:id',
+        title: 'Academic User Schedules',
+        component: AcademicUserSpecificSchedules,
         props: {},
     },
     {
@@ -170,9 +170,9 @@ const coreRoutes = [
         props: {},
     },
     {
-        path: '/classes/staff/today/:id',
-        title: 'Staff Today Classes',
-        component: StaffSpecificTodayScheduleInstances,
+        path: '/classes/academic/today/:id',
+        title: 'Academic User Today Classes',
+        component: AcademicUserSpecificTodayScheduleInstances,
         props: {},
     },
 ];

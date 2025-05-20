@@ -12,16 +12,19 @@ import { convertTo24HourUTC, convertToUTCDate } from '@utils';
 
 import { FireToastEnum } from '@enums';
 
-import type { StaffProps, LocationProps, UserContextProps } from '@types';
+import type {
+    AcademicUserProps,
+    LocationProps,
+    UserContextProps,
+} from '@types';
 
 type EditScheduleProps = {
-    id: number;
     title: string;
     start_time_in_utc: string;
     end_time_in_utc: string;
     is_reoccurring: boolean;
 
-    staff_member_id: number;
+    teacher_id: number;
     location_id: number;
 
     date: string | null;
@@ -42,19 +45,19 @@ export default function EditSchedule() {
     const { user, setLoading } = useContext(AuthContext) as UserContextProps;
 
     const [currentSchedule, setCurrentSchedule] = useState<EditScheduleProps>({
-        id: 0,
         title: '',
         start_time_in_utc: '',
         end_time_in_utc: '',
         is_reoccurring: false,
 
-        staff_member_id: 0,
+        teacher_id: 0,
         location_id: 0,
 
         date: null,
         day: 'monday',
     });
-    const [allStaff, setAllStaff] = useState<StaffProps[]>([]);
+
+    const [allTeachers, setAllTeachers] = useState<AcademicUserProps[]>([]);
     const [allLocations, setAllLocations] = useState<LocationProps[]>([]);
 
     const handleStartOrEndTime = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,6 +75,7 @@ export default function EditSchedule() {
             });
         } else {
             e.target.value = '';
+
             fireToast(
                 'Invalid time format',
                 'Please enter time in HH:MM AM/PM format',
@@ -91,11 +95,13 @@ export default function EditSchedule() {
         // If the format doesn't match 'YYYY-MM-DD'
         if (!dateRegex.test(inputDate)) {
             e.target.value = '';
+
             fireToast(
                 'Invalid date format',
                 'Please enter date in YYYY-MM-DD format',
                 FireToastEnum.WARNING,
             );
+
             return;
         }
 
@@ -113,11 +119,13 @@ export default function EditSchedule() {
             dateObject.getDate() !== day
         ) {
             e.target.value = '';
+
             fireToast(
                 'Invalid date format',
                 'Please enter date in YYYY-MM-DD format',
                 FireToastEnum.WARNING,
             );
+
             return;
         }
 
@@ -136,7 +144,7 @@ export default function EditSchedule() {
                 !currentSchedule.title ||
                 !currentSchedule.start_time_in_utc ||
                 !currentSchedule.end_time_in_utc ||
-                !currentSchedule.staff_member_id ||
+                !currentSchedule.teacher_id ||
                 !currentSchedule.location_id
             ) {
                 throw new Error('Please fill all input fields');
@@ -160,12 +168,11 @@ export default function EditSchedule() {
                 ? '/reoccurring'
                 : '/non-reoccurring';
             let body: EditScheduleProps = {
-                id: currentSchedule.id,
                 title: currentSchedule.title,
                 start_time_in_utc: currentSchedule.start_time_in_utc,
                 end_time_in_utc: currentSchedule.end_time_in_utc,
                 is_reoccurring: currentSchedule.is_reoccurring,
-                staff_member_id: currentSchedule.staff_member_id,
+                teacher_id: currentSchedule.teacher_id,
                 location_id: currentSchedule.location_id,
                 day: null,
                 date: null,
@@ -188,7 +195,7 @@ export default function EditSchedule() {
 
             const response = await res.json();
 
-            if (res.status !== 200)
+            if (!res.ok)
                 throw new Error(
                     typeof response?.detail === 'string'
                         ? response.detail
@@ -232,13 +239,12 @@ export default function EditSchedule() {
                 );
 
             setCurrentSchedule({
-                id: response.id,
                 title: response.title,
                 start_time_in_utc: response.start_time_in_utc,
                 end_time_in_utc: response.end_time_in_utc,
                 is_reoccurring: response.is_reoccurring,
 
-                staff_member_id: response.staff_member.id,
+                teacher_id: response.teacher.id,
                 location_id: response.location.id,
 
                 date: response.date,
@@ -255,43 +261,46 @@ export default function EditSchedule() {
         }
     };
 
-    const fetchAllStaff = async () => {
+    const fetchAllTeachers = async () => {
         try {
-            const res = await fetch(constants.USERS + '/staff', {
-                method: 'GET',
-                headers: {
-                    accept: 'application/json',
-                    Authorization: `Bearer ${user.accessToken}`,
+            const res = await fetch(
+                constants.USERS + '/academic?only_students=no',
+                {
+                    method: 'GET',
+                    headers: {
+                        accept: 'application/json',
+                        Authorization: `Bearer ${user.accessToken}`,
+                    },
                 },
-            });
+            );
 
             const response = await res.json();
 
-            if (res.status !== 200)
+            if (!res.ok)
                 throw new Error(
                     typeof response?.detail === 'string'
                         ? response.detail
                         : 'Something went wrong',
                 );
 
-            const staffArr: StaffProps[] = response.items.map(
-                (staff: StaffProps) => {
+            const teachersArr: AcademicUserProps[] = response.items.map(
+                (teacher: AcademicUserProps) => {
                     return {
-                        id: staff.id,
-                        full_name: staff.full_name,
-                        email: staff.email,
+                        id: teacher.id,
+                        full_name: teacher.full_name,
+                        email: teacher.email,
                         additional_details: {
-                            phone: staff.additional_details.phone,
-                            department: staff.additional_details.department,
-                            designation: staff.additional_details.designation,
+                            phone: teacher.additional_details.phone,
+                            department: teacher.additional_details.department,
+                            designation: teacher.additional_details.designation,
                         },
-                        created_at_in_utc: staff.created_at_in_utc,
-                        updated_at_in_utc: staff.updated_at_in_utc,
+                        created_at_in_utc: teacher.created_at_in_utc,
+                        updated_at_in_utc: teacher.updated_at_in_utc,
                     };
                 },
             );
 
-            setAllStaff(staffArr);
+            setAllTeachers(teachersArr);
         } catch (err: any) {
             fireToast(
                 'There seems to be a problem',
@@ -313,7 +322,7 @@ export default function EditSchedule() {
 
             const response = await res.json();
 
-            if (res.status !== 200)
+            if (!res.ok)
                 throw new Error(
                     typeof response?.detail === 'string'
                         ? response.detail
@@ -346,7 +355,7 @@ export default function EditSchedule() {
     useEffect(() => {
         if (id) {
             fetchSchedule(parseInt(id));
-            fetchAllStaff();
+            fetchAllTeachers();
             fetchAllLocations();
         }
 
@@ -432,37 +441,39 @@ export default function EditSchedule() {
                         <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                             <div className="w-full">
                                 <label className="mb-2.5 block text-black dark:text-white">
-                                    Staff member{' '}
+                                    Teacher{' '}
                                     <span className="text-meta-1">*</span>
                                 </label>
                                 <div className="relative z-20 bg-transparent dark:bg-meta-4">
                                     <select
                                         className="relative z-20 w-full appearance-none rounded border border-stroke bg-gray px-5 py-3 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-meta-4 dark:focus:border-primary"
-                                        name="staff_member_id"
-                                        id="staff_member_id"
-                                        value={currentSchedule.staff_member_id}
+                                        name="teacher_id"
+                                        id="teacher_id"
+                                        value={currentSchedule.teacher_id}
                                         onChange={(e) => {
                                             setCurrentSchedule((prev) => ({
                                                 ...prev,
-                                                staff_member_id: parseInt(
+                                                teacher_id: parseInt(
                                                     e.target.value,
                                                 ),
                                             }));
                                         }}
                                     >
                                         <option value="0">
-                                            Select staff member
+                                            Select teacher
                                         </option>
-                                        {allStaff.map((staff: StaffProps) => {
-                                            return (
-                                                <option
-                                                    key={staff.id}
-                                                    value={staff.id}
-                                                >
-                                                    {staff.full_name}
-                                                </option>
-                                            );
-                                        })}
+                                        {allTeachers.map(
+                                            (teacher: AcademicUserProps) => {
+                                                return (
+                                                    <option
+                                                        key={teacher.id}
+                                                        value={teacher.id}
+                                                    >
+                                                        {teacher.full_name}
+                                                    </option>
+                                                );
+                                            },
+                                        )}
                                     </select>
                                     <span className="absolute right-4 top-1/2 z-30 -translate-y-1/2">
                                         <svg

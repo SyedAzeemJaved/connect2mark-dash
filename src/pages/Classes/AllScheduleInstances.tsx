@@ -41,6 +41,7 @@ export default function AllScheduleInstances() {
 
     const handleDeleteClick = async (id: number) => {
         let r = confirm('Are you sure you want to delete this class?');
+
         if (r === true) {
             try {
                 const res = await fetch(
@@ -56,7 +57,7 @@ export default function AllScheduleInstances() {
 
                 const response = await res.json();
 
-                if (res.status !== 200)
+                if (!res.ok)
                     throw new Error(
                         typeof response?.detail === 'string'
                             ? response.detail
@@ -95,7 +96,7 @@ export default function AllScheduleInstances() {
 
             const response = await res.json();
 
-            if (res.status !== 200)
+            if (!res.ok)
                 throw new Error(
                     typeof response?.detail === 'string'
                         ? response.detail
@@ -111,27 +112,24 @@ export default function AllScheduleInstances() {
                                 schedule_instance.start_time_in_utc,
                             end_time_in_utc: schedule_instance.end_time_in_utc,
                             schedule: schedule_instance.schedule,
-                            staff_member: {
-                                id: schedule_instance.staff_member.id,
-                                full_name:
-                                    schedule_instance.staff_member.full_name,
-                                email: schedule_instance.staff_member.email,
+                            teacher: {
+                                id: schedule_instance.teacher.id,
+                                full_name: schedule_instance.teacher.full_name,
+                                email: schedule_instance.teacher.email,
                                 additional_details: {
-                                    phone: schedule_instance.staff_member
+                                    phone: schedule_instance.teacher
                                         .additional_details.phone,
                                     department:
-                                        schedule_instance.staff_member
+                                        schedule_instance.teacher
                                             .additional_details.department,
                                     designation:
-                                        schedule_instance.staff_member
+                                        schedule_instance.teacher
                                             .additional_details.designation,
                                 },
                                 created_at_in_utc:
-                                    schedule_instance.staff_member
-                                        .created_at_in_utc,
+                                    schedule_instance.teacher.created_at_in_utc,
                                 updated_at_in_utc:
-                                    schedule_instance.staff_member
-                                        .updated_at_in_utc,
+                                    schedule_instance.teacher.updated_at_in_utc,
                             },
                             location: {
                                 id: schedule_instance.location.id,
@@ -199,7 +197,7 @@ export default function AllScheduleInstances() {
                                             className="min-w-[440px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11"
                                             colSpan={2}
                                         >
-                                            Staff member
+                                            Teacher
                                         </th>
                                         <th
                                             className="min-w-[440px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11"
@@ -236,7 +234,7 @@ export default function AllScheduleInstances() {
                                         </th>
                                     </tr>
                                     <tr>
-                                        {/* Staff Member */}
+                                        {/* Teacher */}
                                         <th className="min-w-[50%] px-4 py-4 font-medium text-black dark:text-white">
                                             Original
                                         </th>
@@ -278,13 +276,13 @@ export default function AllScheduleInstances() {
                                         (schedule_instance) => {
                                             return (
                                                 <tr key={schedule_instance.id}>
-                                                    {/* Original Staff Member */}
+                                                    {/* Original Teacher */}
                                                     <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                                                         <p className="text-black dark:text-white">
                                                             {
                                                                 schedule_instance
                                                                     .schedule
-                                                                    .staff_member
+                                                                    .teacher
                                                                     .full_name
                                                             }
                                                         </p>
@@ -292,24 +290,24 @@ export default function AllScheduleInstances() {
                                                             {
                                                                 schedule_instance
                                                                     .schedule
-                                                                    .staff_member
+                                                                    .teacher
                                                                     .email
                                                             }
                                                         </span>
                                                     </td>
-                                                    {/* Current Staff Member */}
+                                                    {/* Current Teacher */}
                                                     <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                                                         <p className="text-black dark:text-white">
                                                             {
                                                                 schedule_instance
-                                                                    .staff_member
+                                                                    .teacher
                                                                     .full_name
                                                             }
                                                         </p>
                                                         <span className="text-sm">
                                                             {
                                                                 schedule_instance
-                                                                    .staff_member
+                                                                    .teacher
                                                                     .email
                                                             }
                                                         </span>

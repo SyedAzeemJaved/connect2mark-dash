@@ -55,14 +55,15 @@ export default function AllScheduleInstances() {
                     },
                 );
 
-                const response = await res.json();
+                if (!res.ok) {
+                    const response = await res.json();
 
-                if (!res.ok)
                     throw new Error(
                         typeof response?.detail === 'string'
                             ? response.detail
                             : 'Something went wrong',
                     );
+                }
 
                 fireToast(
                     'Success',

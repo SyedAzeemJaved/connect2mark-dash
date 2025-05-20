@@ -33,6 +33,7 @@ export default function Locations() {
 
     const handleDeleteClick = async (id: number) => {
         let r = confirm('Are you sure you want to delete this location?');
+
         if (r === true) {
             try {
                 const res = await fetch(`${constants.LOCATIONS}/${id}`, {
@@ -45,7 +46,7 @@ export default function Locations() {
 
                 const response = await res.json();
 
-                if (res.status !== 200)
+                if (!res.ok)
                     throw new Error(
                         typeof response?.detail === 'string'
                             ? response.detail
@@ -84,7 +85,7 @@ export default function Locations() {
 
             const response = await res.json();
 
-            if (res.status !== 200)
+            if (!res.ok)
                 throw new Error(
                     typeof response?.detail === 'string'
                         ? response.detail

@@ -9,6 +9,8 @@ export const constants = {
     USERS: `${API_BASE_URL}/admin/users`,
     LOCATIONS: `${API_BASE_URL}/admin/locations`,
     SCHEDULES: `${API_BASE_URL}/admin/schedules`,
+    SCHEDULE_STUDENTS: `${API_BASE_URL}/admin/schedules/students/`,
+
     SCHEDULE_INSTANCES: `${API_BASE_URL}/admin/schedule-instances`,
     ATTENDANCE_RESULT: `${API_BASE_URL}/admin/attendance-result`,
 

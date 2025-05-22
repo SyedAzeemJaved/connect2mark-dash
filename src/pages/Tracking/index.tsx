@@ -11,6 +11,24 @@ import { FireToastEnum } from '@enums';
 import type { UserContextProps, ScheduleInstanceProps } from '@types';
 import type { AttendanceUser } from './types';
 
+function getClassDuration(start: string, end: string) {
+    // start and end are in "HH:mm:ss"
+    const [startH, startM, startS] = start.split(':').map(Number);
+    const [endH, endM, endS] = end.split(':').map(Number);
+
+    const startTotal = startH * 3600 + startM * 60 + startS;
+    const endTotal = endH * 3600 + endM * 60 + endS;
+
+    let diff = endTotal - startTotal;
+    if (diff < 0) diff += 24 * 3600; // handle overnight classes
+
+    return Math.round(diff / 60); // duration in minutes
+}
+
+function formatTime(t: string) {
+    const [h, m] = t.split(':');
+    return `${h}:${m}`;
+}
 export default function AttendanceDashboard() {
     const { user } = useContext(AuthContext) as UserContextProps;
 
@@ -135,6 +153,34 @@ export default function AttendanceDashboard() {
                     ))}
                 </select>
             </div>
+
+            {data.selectedScheduleInstanceId &&
+                (() => {
+                    const selectedInstance =
+                        data.allScheduleInstancesToday.find(
+                            (si) => si.id === data.selectedScheduleInstanceId,
+                        );
+                    if (!selectedInstance) return null;
+                    const start = selectedInstance.start_time_in_utc;
+                    const end = selectedInstance.end_time_in_utc;
+                    const duration = getClassDuration(start, end);
+                    return (
+                        <div className="mb-6">
+                            <h3 className="text-gray-900 mb-1 text-lg font-semibold dark:text-white">
+                                Attendance Duration
+                            </h3>
+                            <div className="text-gray-700 dark:text-gray-200">
+                                Class Duration:{' '}
+                                <span className="font-bold">
+                                    {duration} min
+                                </span>
+                                <span className="text-gray-500 ml-2 text-xs">
+                                    ({formatTime(start)} - {formatTime(end)})
+                                </span>
+                            </div>
+                        </div>
+                    );
+                })()}
 
             {data?.teacher && (
                 <div className="mb-8 flex flex-col gap-4 rounded-lg border border-primary bg-primary/10 p-6 shadow md:flex-row md:items-center">

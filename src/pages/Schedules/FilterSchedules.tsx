@@ -217,6 +217,17 @@ export default function FilterSchedules() {
                         start_time_in_utc: schedule.start_time_in_utc,
                         end_time_in_utc: schedule.end_time_in_utc,
                         is_reoccurring: schedule.is_reoccurring,
+                        teacher: {
+                            id: schedule.teacher.id,
+                            full_name: schedule.teacher.full_name,
+                            email: schedule.teacher.email,
+                            additional_details:
+                                schedule.teacher.additional_details,
+                            created_at_in_utc:
+                                schedule.teacher.created_at_in_utc,
+                            updated_at_in_utc:
+                                schedule.teacher.updated_at_in_utc,
+                        },
                         location: {
                             id: schedule.location.id,
                             title: schedule.location.title,

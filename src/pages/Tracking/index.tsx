@@ -37,11 +37,13 @@ export default function AttendanceDashboard() {
         students: AttendanceUser[];
         allScheduleInstancesToday: ScheduleInstanceProps[];
         selectedScheduleInstanceId: number | undefined;
+        totalClassDuration: number;
     }>({
         teacher: undefined,
         students: [],
         allScheduleInstancesToday: [],
         selectedScheduleInstanceId: undefined,
+        totalClassDuration: 0,
     });
 
     const fetchTodayScheduleInstances = async () => {
@@ -102,6 +104,13 @@ export default function AttendanceDashboard() {
                 ...prev,
                 teacher: response?.find((u: AttendanceUser) => !u.is_student),
                 students: response?.filter((u: AttendanceUser) => u.is_student),
+                totalClassDuration:
+                    response?.lenght > 0
+                        ? getClassDuration(
+                              response[0].start_time_in_utc,
+                              response[0].end_time_in_utc,
+                          )
+                        : 0,
             }));
         } catch (err: any) {
             fireToast(
@@ -179,7 +188,7 @@ export default function AttendanceDashboard() {
                     );
                 })()}
 
-            {data?.teacher && (
+            {data?.teacher && data.totalClassDuration && (
                 <div className="mb-8 flex flex-col gap-4 rounded-lg border border-primary bg-primary/10 p-6 shadow md:flex-row md:items-center">
                     <div className="flex-1">
                         <div className="text-lg font-bold text-primary">
@@ -210,6 +219,34 @@ export default function AttendanceDashboard() {
                                 {data?.teacher.attendance_percentage.toFixed(2)}
                                 %
                             </span>
+                            <span>
+                                <span className="font-semibold">
+                                    Duration %:
+                                </span>{' '}
+                                {(
+                                    (data.teacher.total_time_in_class_minutes /
+                                        data.totalClassDuration) *
+                                    100
+                                ).toFixed(2)}
+                                %
+                            </span>
+                            <span
+                                className={`font-semibold ${
+                                    (data.teacher.total_time_in_class_minutes /
+                                        data.totalClassDuration) *
+                                        100 >=
+                                    70
+                                        ? 'text-green-600'
+                                        : 'text-red-600'
+                                }`}
+                            >
+                                {(data.teacher.total_time_in_class_minutes /
+                                    data.totalClassDuration) *
+                                    100 >=
+                                70
+                                    ? 'Eligible for attendance'
+                                    : 'Not eligible for attendance'}
+                            </span>
                         </div>
                     </div>
                     <div className="text-2xl font-bold text-primary">
@@ -218,51 +255,77 @@ export default function AttendanceDashboard() {
                 </div>
             )}
 
-            {data?.students?.length > 0 && (
+            {data?.students?.length > 0 && data.totalClassDuration && (
                 <div>
                     <h3 className="text-gray-900 mb-4 text-lg font-semibold dark:text-white">
                         Students
                     </h3>
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                        {data?.students.map((student: AttendanceUser) => (
-                            <div
-                                key={student?.user_id}
-                                className="rounded-lg border border-stroke bg-white p-4 shadow dark:bg-form-input"
-                            >
-                                <div className="text-gray-800 font-semibold dark:text-white">
-                                    {student?.full_name}
+                        {data?.students.map((student: AttendanceUser) => {
+                            const durationPercent =
+                                (student.total_time_in_class_minutes /
+                                    data.totalClassDuration) *
+                                100;
+                            const eligible = durationPercent >= 70;
+                            return (
+                                <div
+                                    key={student?.user_id}
+                                    className="rounded-lg border border-stroke bg-white p-4 shadow dark:bg-form-input"
+                                >
+                                    <div className="text-gray-800 font-semibold dark:text-white">
+                                        {student?.full_name}
+                                    </div>
+                                    <div className="text-gray-500 dark:text-gray-300 mb-2 text-xs">
+                                        {student?.email}
+                                    </div>
+                                    <div className="flex flex-wrap gap-4 text-sm">
+                                        <span>
+                                            <span className="font-semibold">
+                                                First Entry:
+                                            </span>{' '}
+                                            {new Date(
+                                                student?.first_entry,
+                                            ).toLocaleString()}
+                                        </span>
+                                        <span>
+                                            <span className="font-semibold">
+                                                Total Time:
+                                            </span>{' '}
+                                            {
+                                                student?.total_time_in_class_minutes
+                                            }{' '}
+                                            min
+                                        </span>
+                                        <span>
+                                            <span className="font-semibold">
+                                                Attendance %:
+                                            </span>{' '}
+                                            {student?.attendance_percentage.toFixed(
+                                                2,
+                                            )}
+                                            %
+                                        </span>
+                                        <span>
+                                            <span className="font-semibold">
+                                                Duration %:
+                                            </span>{' '}
+                                            {durationPercent.toFixed(2)}%
+                                        </span>
+                                        <span
+                                            className={`font-semibold ${
+                                                eligible
+                                                    ? 'text-green-600'
+                                                    : 'text-red-600'
+                                            }`}
+                                        >
+                                            {eligible
+                                                ? 'Eligible for attendance'
+                                                : 'Not eligible for attendance'}
+                                        </span>
+                                    </div>
                                 </div>
-                                <div className="text-gray-500 dark:text-gray-300 mb-2 text-xs">
-                                    {student?.email}
-                                </div>
-                                <div className="flex flex-wrap gap-4 text-sm">
-                                    <span>
-                                        <span className="font-semibold">
-                                            First Entry:
-                                        </span>{' '}
-                                        {new Date(
-                                            student?.first_entry,
-                                        ).toLocaleString()}
-                                    </span>
-                                    <span>
-                                        <span className="font-semibold">
-                                            Total Time:
-                                        </span>{' '}
-                                        {student?.total_time_in_class_minutes}{' '}
-                                        min
-                                    </span>
-                                    <span>
-                                        <span className="font-semibold">
-                                            Attendance %:
-                                        </span>{' '}
-                                        {student?.attendance_percentage.toFixed(
-                                            2,
-                                        )}
-                                        %
-                                    </span>
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
             )}

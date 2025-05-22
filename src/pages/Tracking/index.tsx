@@ -43,7 +43,6 @@ export default function AttendanceDashboard() {
         allScheduleInstancesToday: [],
         selectedScheduleInstanceId: undefined,
     });
-    const [loading, setLoading] = useState<boolean>(false);
 
     const fetchTodayScheduleInstances = async () => {
         try {
@@ -77,8 +76,6 @@ export default function AttendanceDashboard() {
                 err.message,
                 FireToastEnum.DANGER,
             );
-        } finally {
-            setLoading(false);
         }
     };
 

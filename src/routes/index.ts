@@ -48,7 +48,15 @@ const AcademicUserSpecificTodayScheduleInstances = lazy(
     () => import('../pages/Classes/AcademicUserSpecificTodayScheduleInstances'),
 );
 
+const AttendanceTrackingDashboard = lazy(() => import('../pages/Tracking'));
+
 const coreRoutes = [
+    {
+        path: '/tracking',
+        title: 'Tracking Dashboard',
+        component: AttendanceTrackingDashboard,
+        props: {},
+    },
     {
         path: '/teachers/all',
         title: 'All Teachers',

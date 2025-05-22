@@ -14,5 +14,7 @@ export const constants = {
     SCHEDULE_INSTANCES: `${API_BASE_URL}/admin/schedule-instances`,
     ATTENDANCE_RESULT: `${API_BASE_URL}/admin/attendance-result`,
 
+    ATTENDANCE_TRACKING: `${API_BASE_URL}/admin/attendance-tracking`,
+
     RESULTS_PER_PAGE: 20,
 };

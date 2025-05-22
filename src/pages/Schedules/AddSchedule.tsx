@@ -105,6 +105,7 @@ export default function AddSchedule() {
         // If the format doesn't match 'YYYY-MM-DD'
         if (!dateRegex.test(inputDate)) {
             e.target.value = '';
+
             fireToast(
                 'Invalid date format',
                 'Please enter date in YYYY-MM-DD format',
@@ -127,6 +128,7 @@ export default function AddSchedule() {
             dateObject.getDate() !== day
         ) {
             e.target.value = '';
+
             fireToast(
                 'Invalid date format',
                 'Please enter date in YYYY-MM-DD format',
@@ -135,14 +137,12 @@ export default function AddSchedule() {
             return;
         }
 
-        console.log(e.target.value);
-
         // All checks were true
         setData((prev) => ({
             ...prev,
             schedule: {
                 ...prev.schedule,
-                [e.target.value]: convertToUTCDate(inputDate),
+                [e.target.name]: convertToUTCDate(inputDate),
             },
         }));
     };
@@ -396,6 +396,7 @@ export default function AddSchedule() {
     return (
         <>
             <Breadcrumb pageName="Add Schedule" />
+
             <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
                 <div className="border-b border-stroke px-6.5 py-4 dark:border-strokedark">
                     <h3 className="font-medium text-black dark:text-white">
@@ -578,70 +579,74 @@ export default function AddSchedule() {
                             </div>
                         </div>
 
-                        <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                            <div className="w-full">
-                                <label className="mb-2.5 block text-black dark:text-white">
-                                    Students{' '}
-                                    <span className="text-meta-1">*</span>
-                                </label>
-                                <div className="relative z-20">
-                                    <select
-                                        className="w-full appearance-none rounded border border-stroke bg-transparent px-5 py-3 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                                        multiple
-                                        onChange={(e) => {
-                                            setData((prev) => ({
-                                                ...prev,
-                                                schedule: {
-                                                    ...prev.schedule,
-                                                    students: [
-                                                        ...prev.schedule
-                                                            .students,
-                                                        parseInt(
-                                                            e.target.value,
-                                                        ),
-                                                    ],
-                                                },
-                                            }));
-                                        }}
-                                    >
-                                        <option value="0">
-                                            Select students
-                                        </option>
-                                        {data?.students?.map(
-                                            (
-                                                academicUser: AcademicUserProps,
-                                            ) => {
-                                                return (
-                                                    <option
-                                                        key={academicUser.id}
-                                                        value={academicUser.id}
-                                                    >
-                                                        {academicUser.full_name}
-                                                    </option>
-                                                );
-                                            },
-                                        )}
-                                    </select>
-                                    <span className="absolute right-4 top-1/2 z-30 -translate-y-1/2">
-                                        <svg
-                                            className="fill-current"
-                                            width="24"
-                                            height="24"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                        >
-                                            <g opacity="0.8">
-                                                <path
-                                                    fillRule="evenodd"
-                                                    clipRule="evenodd"
-                                                    d="M5.29289 8.29289C5.68342 7.90237 6.31658 7.90237 6.70711 8.29289L12 13.5858L17.2929 8.29289C17.6834 7.90237 18.3166 7.90237 18.7071 8.29289C19.0976 8.68342 19.0976 9.31658 18.7071 9.70711L12.7071 15.7071C12.3166 16.0976 11.6834 16.0976 11.2929 15.7071L5.29289 9.70711C4.90237 9.31658 4.90237 8.68342 5.29289 8.29289Z"
-                                                    fill=""
-                                                ></path>
-                                            </g>
-                                        </svg>
-                                    </span>
-                                </div>
+                        <div className="mb-4.5">
+                            <label className="mb-2.5 block text-black dark:text-white">
+                                Students <span className="text-meta-1">*</span>
+                            </label>
+                            <div className="flex flex-wrap gap-2">
+                                {data?.students?.map(
+                                    (academicUser: AcademicUserProps) => {
+                                        const isSelected =
+                                            data.schedule.students.includes(
+                                                academicUser.id,
+                                            );
+                                        return (
+                                            <button
+                                                type="button"
+                                                key={academicUser.id}
+                                                onClick={() => {
+                                                    setData((prev) => {
+                                                        const selected =
+                                                            prev.schedule
+                                                                .students;
+                                                        const already =
+                                                            selected.includes(
+                                                                academicUser.id,
+                                                            );
+                                                        return {
+                                                            ...prev,
+                                                            schedule: {
+                                                                ...prev.schedule,
+                                                                students:
+                                                                    already
+                                                                        ? selected.filter(
+                                                                              (
+                                                                                  id,
+                                                                              ) =>
+                                                                                  id !==
+                                                                                  academicUser.id,
+                                                                          )
+                                                                        : [
+                                                                              ...selected,
+                                                                              academicUser.id,
+                                                                          ],
+                                                            },
+                                                        };
+                                                    });
+                                                }}
+                                                className={`rounded border px-4 py-2 transition 
+                        ${
+                            isSelected
+                                ? 'border-primary bg-primary text-white'
+                                : 'border-stroke bg-white text-black dark:border-form-strokedark dark:bg-form-input dark:text-white'
+                        }
+                        hover:bg-primary hover:text-white`}
+                                            >
+                                                {academicUser.full_name}
+                                                {isSelected && (
+                                                    <span className="text-green-400 ml-2 font-bold">
+                                                        &#10003;
+                                                    </span>
+                                                )}
+                                            </button>
+                                        );
+                                    },
+                                )}
+                            </div>
+                            <div className="text-gray-500 mt-2 text-xs">
+                                {data.schedule.students.length === 0
+                                    ? 'No students selected'
+                                    : `${data.schedule.students.length} selected`}
                             </div>
                         </div>
 

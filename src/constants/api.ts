@@ -1,5 +1,5 @@
 const API_BASE_URL = 'https://safecheck-api-production.up.railway.app';
-// const API_BASE_URL = 'http://192.168.100.44:8000';
+// const API_BASE_URL = 'http://localhost:8000';
 
 export const constants = {
     TOKEN: `${API_BASE_URL}/token`,
@@ -9,10 +9,10 @@ export const constants = {
     USERS: `${API_BASE_URL}/admin/users`,
     LOCATIONS: `${API_BASE_URL}/admin/locations`,
     SCHEDULES: `${API_BASE_URL}/admin/schedules`,
-    SCHEDULE_STUDENTS: `${API_BASE_URL}/admin/schedules/students/`,
+    SCHEDULE_STUDENTS: `${API_BASE_URL}/admin/schedules/students`,
 
     SCHEDULE_INSTANCES: `${API_BASE_URL}/admin/schedule-instances`,
     ATTENDANCE_RESULT: `${API_BASE_URL}/admin/attendance-result`,
 
-    RESULTS_PER_PAGE: 10,
+    RESULTS_PER_PAGE: 20,
 };
